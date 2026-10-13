@@ -1,0 +1,53 @@
+# Dependencies
+node_modules/
+**/node_modules/
+.pnp
+.pnp.js
+
+# Environment variables (Never commit sensitive keys or database credentials)
+.env
+.env*.local
+**/.env
+**/.env.*
+!**/.env.example
+
+# Production builds
+dist/
+dist-ssr/
+build/
+out/
+.next/
+.output/
+**/.output/
+
+# Cache and logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+.tanstack/
+**/.tanstack/
+.turbo/
+.cache/
+
+# Cloudflare / Wrangler
+.wrangler/
+**/.wrangler/
+.dev.vars
+
+# Editor & OS files
+.vscode/
+**/.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.vercel/
+**/.vercel/

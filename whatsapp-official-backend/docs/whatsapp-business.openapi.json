@@ -1,0 +1,4416 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "WhatsApp Business API",
+    "description": "WhatsApp Business API for sending messages, managing templates, and handling media.\n\n## Authentication\n\nPick **one** of the following on every request:\n\n- **Basic Auth** — enter your username and password.\n- **API Key (header)** — pass your API key in the `x-api-key` header.\n- **API Key (query param)** — pass your API key as `?apiKey=<your-api-key>` in the URL.\n\n## `x-phone-id` *(in case of multiple phone numbers)*\n\nIf your account has more than one WhatsApp number connected, you need to tell the API which one to use. Pass the phone number's ID in either:\n\n- **Header:** `x-phone-id: YOUR_PHONE_ID`, or\n- **Query param:** `&phoneId=YOUR_PHONE_ID`\n\nWhen to send it:\n- **One number on your account:** you can skip this — it's picked automatically.\n- **Multiple numbers:** **required** — without it, the request will fail.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "API Support",
+      "url": "http://localhost:4000/support"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:4000"
+    }
+  ],
+  "security": [
+    {
+      "BasicAuth": []
+    },
+    {
+      "ApiKeyAuth": []
+    },
+    {
+      "ApiKeyQuery": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Messages",
+      "description": "Send and manage WhatsApp messages"
+    },
+    {
+      "name": "Templates",
+      "description": "Create and manage message templates"
+    },
+    {
+      "name": "Reports",
+      "description": "Get delivery reports and message status"
+    },
+    {
+      "name": "Contacts",
+      "description": "Manage contacts"
+    },
+    {
+      "name": "Payments",
+      "description": "Manage and retrieve active payment configurations for payment messages"
+    },
+    {
+      "name": "Media",
+      "description": "Upload media and fetch media details for public messaging APIs"
+    },
+    {
+      "name": "Users",
+      "description": "List agents and agent dropdown options for assignment workflows"
+    }
+  ],
+  "paths": {
+    "/api/v1/whatsapp/metaPayment/configs/active": {
+      "get": {
+        "tags": [
+          "Payments"
+        ],
+        "summary": "List active payment configurations",
+        "description": "Retrieve all active payment configuration profiles that can be referenced via orderDetail.configuration_name when sending a TemplateMessage that includes an orderDetail block.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/XPhoneId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Array of active payment configurations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PaymentConfiguration"
+                  }
+                },
+                "examples": {
+                  "sample": {
+                    "summary": "Sample active configurations",
+                    "value": [
+                      {
+                        "id": "000000000000000000000001",
+                        "whatsappBusinessAccountId": "987654321098765",
+                        "configuration_name": "<replace-with-active-configuration_name>",
+                        "merchant_category_code": {
+                          "code": "0000",
+                          "description": "Test MCC Code"
+                        },
+                        "purpose_code": {
+                          "code": "00",
+                          "description": "Test Purpose Code"
+                        },
+                        "status": "Active",
+                        "provider_mid": "acc_testMerchant123",
+                        "provider_name": "PayU",
+                        "created_timestamp": 1737707351,
+                        "updated_timestamp": 1737707417,
+                        "creationTime": 1700000000000,
+                        "lastUpdateTime": 1700086400000
+                      },
+                      {
+                        "id": "000000000000000000000001",
+                        "whatsappBusinessAccountId": "987654321098765",
+                        "configuration_name": "test-rz",
+                        "merchant_category_code": {
+                          "code": "0000",
+                          "description": "Test MCC Code"
+                        },
+                        "purpose_code": {
+                          "code": "00",
+                          "description": "Test Purpose Code"
+                        },
+                        "status": "Active",
+                        "provider_mid": "acc_testMerchant123",
+                        "provider_name": "Razorpay",
+                        "created_timestamp": 1737716713,
+                        "updated_timestamp": 1737716837,
+                        "creationTime": 1700000000000,
+                        "lastUpdateTime": 1700086400000
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - authentication missing, invalid, or expired",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedProblem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/whatsapp/sendMessage": {
+      "post": {
+        "tags": [
+          "Messages"
+        ],
+        "summary": "Send WhatsApp message",
+        "description": "Send various types of WhatsApp messages including text, media, templates, buttons, lists, and more. Supports multiple file handling methods and message types.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/XPhoneId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/TextMessage"
+                  },
+                  {
+                    "$ref": "#/components/schemas/TemplateMessage"
+                  },
+                  {
+                    "$ref": "#/components/schemas/MediaMessage"
+                  },
+                  {
+                    "$ref": "#/components/schemas/ListButtonMessage"
+                  },
+                  {
+                    "$ref": "#/components/schemas/ReplyButtonMessage"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CtaUrlMessage"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CatalogMessage"
+                  },
+                  {
+                    "$ref": "#/components/schemas/ProductMessage"
+                  },
+                  {
+                    "$ref": "#/components/schemas/LocationMessage"
+                  },
+                  {
+                    "$ref": "#/components/schemas/ContactMessage"
+                  },
+                  {
+                    "$ref": "#/components/schemas/LocationRequestMessage"
+                  },
+                  {
+                    "$ref": "#/components/schemas/AddressRequestMessage"
+                  },
+                  {
+                    "$ref": "#/components/schemas/PaymentMessage"
+                  }
+                ]
+              },
+              "examples": {
+                "textMessage": {
+                  "summary": "Simple text message",
+                  "value": {
+                    "to": "1234567890",
+                    "text": "Hello, this is a test message!"
+                  }
+                },
+                "templateMessage": {
+                  "summary": "Template message with variables",
+                  "value": {
+                    "templateName": "welcome",
+                    "language": "en",
+                    "to": "1234567890",
+                    "templateVariables": [
+                      "Variable1Value"
+                    ]
+                  }
+                },
+                "templateWithMetaMedia": {
+                  "summary": "Template message with Meta Media ID",
+                  "value": {
+                    "templateName": "lib_busy_ledger",
+                    "language": "en",
+                    "to": "1234567890",
+                    "metaMediaId": "120363401234567890",
+                    "templateVariables": [
+                      "Variable1Value",
+                      "Variable2Value"
+                    ]
+                  }
+                },
+                "templateWithFileUrl": {
+                  "summary": "Template message with file URL",
+                  "value": {
+                    "templateName": "document_template",
+                    "language": "en",
+                    "to": "1234567890",
+                    "fileUrl": "https://example.com/document.pdf",
+                    "templateVariables": [
+                      "Customer Name"
+                    ]
+                  }
+                },
+                "templateWithBase64": {
+                  "summary": "Template message with base64 file",
+                  "value": {
+                    "templateName": "invoice_template",
+                    "language": "en",
+                    "to": "1234567890",
+                    "base64File": {
+                      "name": "invoice.pdf",
+                      "body": "JVBERi0xLjEKJcKlwrHDqwoKMSAwIG9iagogIDw8IC9UeXBlIC9DYXRhbG9n..."
+                    },
+                    "templateVariables": [
+                      "Invoice #12345",
+                      "₹1000"
+                    ]
+                  }
+                },
+                "mediaFileUrl": {
+                  "summary": "Media message with URL",
+                  "value": {
+                    "to": "1234567890",
+                    "fileUrl": "https://example.com/image.jpg",
+                    "caption": "Check out this image!"
+                  }
+                },
+                "mediaBase64": {
+                  "summary": "Media message with base64",
+                  "value": {
+                    "to": "1234567890",
+                    "base64File": {
+                      "name": "image.jpg",
+                      "body": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg=="
+                    },
+                    "caption": "Image sent via base64"
+                  }
+                },
+                "listButton": {
+                  "summary": "List button message",
+                  "value": {
+                    "to": "1234567890",
+                    "listButton": {
+                      "header": "Welcome to our store",
+                      "body": "Please select an item from the list below",
+                      "footer": "Thank you for shopping with us",
+                      "button": "Select Item",
+                      "sections": [
+                        {
+                          "title": "Electronics",
+                          "rows": [
+                            {
+                              "title": "Smartphone",
+                              "description": "Latest smartphone model"
+                            },
+                            {
+                              "title": "Laptop",
+                              "description": "High-performance laptop"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                },
+                "mediaMetaId": {
+                  "summary": "Media message with Meta Media ID",
+                  "value": {
+                    "to": "1234567890",
+                    "metaMediaId": "120363401234567890",
+                    "caption": "Visit shimla"
+                  }
+                },
+                "replyButton": {
+                  "summary": "Interactive reply buttons with media",
+                  "value": {
+                    "to": "1234567890",
+                    "replyButton": {
+                      "body": "Hi Pablo! Your gardening workshop is scheduled for 9am tomorrow. Use the buttons if you need to reschedule. Thank you!",
+                      "footer": "STOP to unsubscribe",
+                      "buttons": [
+                        {
+                          "title": "Change"
+                        },
+                        {
+                          "title": "Cancel"
+                        }
+                      ]
+                    },
+                    "metaMediaId": "120363401234567890"
+                  }
+                },
+                "ctaUrl": {
+                  "summary": "CTA URL message",
+                  "value": {
+                    "to": "1234567890",
+                    "ctaUrl": {
+                      "body": "Welcome.",
+                      "footer": "STOP to unsubscribe",
+                      "button": "Checkout new blog",
+                      "url": "https://example.com"
+                    }
+                  }
+                },
+                "locationRequest": {
+                  "summary": "Location request message",
+                  "value": {
+                    "to": "1234567890",
+                    "locationRequest": true,
+                    "text": "Could you pls share your location"
+                  }
+                },
+                "addressRequest": {
+                  "summary": "Address request message",
+                  "value": {
+                    "to": "1234567890",
+                    "address": {
+                      "header": "Good Morning",
+                      "body": "please share your address so we can processed further",
+                      "footer": "STOP to unsubscribe"
+                    }
+                  }
+                },
+                "locationMessage": {
+                  "summary": "Send location message",
+                  "value": {
+                    "to": "1234567890",
+                    "location": {
+                      "name": "Taj Mahal",
+                      "address": "Dharmapuri, Forest Colony, Tajganj, Agra, Uttar Pradesh 282001",
+                      "latitude": "27.173891",
+                      "longitude": "78.042068"
+                    }
+                  }
+                },
+                "templatePaymentOrder": {
+                  "summary": "Template message with orderDetail (required fields only; optional fields: headerImageLink, tax, taxDescription, discount, shipping, subtotal, total_amount, expiration)",
+                  "value": {
+                    "templateName": "order_detail_new",
+                    "language": "en",
+                    "to": "1234567890",
+                    "orderDetail": {
+                      "body": "Thanks!",
+                      "footer": "Complete payment",
+                      "goodsType": "digital-goods",
+                      "configuration_name": "<replace-with-active-configuration_name>",
+                      "items": [
+                        {
+                          "name": "Intel Plastic Bowl Set",
+                          "amount": 1,
+                          "quantity": 1
+                        }
+                      ]
+                    }
+                  }
+                },
+                "templatePaymentOrderFull": {
+                  "summary": "Template payment message (all optional fields shown)",
+                  "value": {
+                    "templateName": "order_detail_new",
+                    "language": "en",
+                    "to": "1234567890",
+                    "orderDetail": {
+                      "headerImageLink": "https://example.com/header.png",
+                      "body": "Thanks! Here is your order detail",
+                      "footer": "Complete payment",
+                      "goodsType": "digital-goods",
+                      "configuration_name": "<replace-with-active-configuration_name>",
+                      "tax": "5",
+                      "taxDescription": "GST",
+                      "discount": "2",
+                      "shipping": "1",
+                      "items": [
+                        {
+                          "name": "Intel Plastic Bowl Set",
+                          "amount": 1,
+                          "quantity": 1
+                        },
+                        {
+                          "name": "Addon Lid",
+                          "amount": 1,
+                          "quantity": 2
+                        }
+                      ],
+                      "subtotal": 3,
+                      "total_amount": 7,
+                      "expiration": {
+                        "timestamp": "1756570984",
+                        "description": "Expires in 48 hours"
+                      }
+                    }
+                  }
+                },
+                "paymentMessage": {
+                  "summary": "Standalone payment message (non-template) with minimal required fields",
+                  "value": {
+                    "to": "1234567890",
+                    "orderDetail": {
+                      "body": "Thank you for shopping with us",
+                      "footer": "Pay for your order",
+                      "goodsType": "digital-goods",
+                      "configuration_name": "<replace-with-active-configuration_name>",
+                      "items": [
+                        {
+                          "name": "OS TEN-91 66804",
+                          "amount": "8",
+                          "quantity": "1"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "paymentMessageFull": {
+                  "summary": "Standalone payment message (all optional fields shown)",
+                  "value": {
+                    "to": "1234567890",
+                    "orderDetail": {
+                      "headerImageLink": "https://example.com/header.png",
+                      "body": "Thank you for shopping with us",
+                      "footer": "Pay for your order",
+                      "goodsType": "digital-goods",
+                      "configuration_name": "<replace-with-active-configuration_name>",
+                      "tax": "2",
+                      "taxDescription": "Sales Tax",
+                      "discount": "1",
+                      "shipping": "0",
+                      "items": [
+                        {
+                          "name": "OS TEN-91 66804",
+                          "amount": "8",
+                          "quantity": "1"
+                        },
+                        {
+                          "name": "Extra Warranty",
+                          "amount": "2",
+                          "quantity": "1"
+                        }
+                      ],
+                      "subtotal": 10,
+                      "total_amount": 11,
+                      "expiration": {
+                        "timestamp": "1756570984",
+                        "description": "Offer expires at the end of the year"
+                      }
+                    }
+                  }
+                },
+                "carouselTemplate": {
+                  "summary": "Carousel template with multiple media files using Meta Media IDs (minimum 2 files required)",
+                  "value": {
+                    "templateName": "carousel_template",
+                    "language": "en",
+                    "to": "9876543210",
+                    "templateVariables": [
+                      "Variable1Value",
+                      "Variable1Value",
+                      "Variable1Value"
+                    ],
+                    "files": [
+                      {
+                        "metaMediaId": "120363401234567890"
+                      },
+                      {
+                        "metaMediaId": "120363401234567890"
+                      }
+                    ]
+                  }
+                },
+                "carouselTemplateWithUrls": {
+                  "summary": "Carousel template with multiple media files using URLs (minimum 2 files required)",
+                  "value": {
+                    "templateName": "carousel_template",
+                    "language": "en",
+                    "to": "9876543210",
+                    "templateVariables": [
+                      "Variable1Value",
+                      "Variable1Value",
+                      "Variable1Value"
+                    ],
+                    "files": [
+                      {
+                        "fileUrl": "https://example.com/products/tshirt.jpg"
+                      },
+                      {
+                        "fileUrl": "https://example.com/products/tshirt.jpg"
+                      }
+                    ]
+                  }
+                },
+                "catalogCarouselTemplate": {
+                  "summary": "Catalog carousel template with multiple products (use /api/v1/catalog/products to get product IDs)",
+                  "value": {
+                    "templateName": "catalog_carousel_template",
+                    "language": "en",
+                    "to": "9876543210",
+                    "products": [
+                      {
+                        "productRetailerId": "product_123"
+                      },
+                      {
+                        "productRetailerId": "product_123"
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/MultipartMessage"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Message accepted, or rejected with an `error` object - see the schema description",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SendMessageResponse"
+                },
+                "example": {
+                  "id": "000000000000000000000001",
+                  "waMessageId": "wamid.HBgMOTE5ODc2NTQzMjEwFQIAERgSQkY2RjE4Q0Q0NTY3ODkwMTIA"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Rejected by Meta - Meta's status and error body are passed through",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetaSendMessageProblem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - authentication missing, invalid, or expired",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedProblem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/whatsapp/sendMessageByCampaign1": {
+      "post": {
+        "tags": [
+          "Messages"
+        ],
+        "summary": "Send bulk messages using CSV campaign",
+        "description": "Send WhatsApp messages to multiple recipients using CSV file upload. Supports template messages with variables for bulk messaging campaigns.\n\nAdd a `schedule` object to the campaign configuration to queue the campaign for later instead of sending it immediately. Scheduled campaigns can be listed with `GET /api/v1/whatsapp/schedule/campaign/list` and cancelled with `DELETE /api/v1/whatsapp/schedule/campaign/{campaignId}`.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/XPhoneId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "jsonData",
+                  "csvFile"
+                ],
+                "properties": {
+                  "jsonData": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "JSON string containing campaign configuration (stringify of CampaignData schema)",
+                    "example": "{\"campaignType\":\"CSV\",\"campaignName\":\"swagger api test\",\"message\":{\"templateName\":\"welcome\",\"language\":\"en\"}}"
+                  },
+                  "csvFile": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "CSV file containing recipient numbers and template variables"
+                  }
+                }
+              },
+              "examples": {
+                "bulkCampaign": {
+                  "summary": "Bulk campaign with CSV file",
+                  "value": {
+                    "jsonData": "{\"campaignType\":\"CSV\",\"campaignName\":\"swagger api test\",\"message\":{\"templateName\":\"welcome\",\"language\":\"en\"}}",
+                    "csvFile": "receiverNumber,Variable 1\n+919876543210,Sample Value 1\n+919876543211,Sample Value 2"
+                  }
+                },
+                "scheduledCampaignAtDateTime": {
+                  "summary": "Schedule a campaign for a specific date and time",
+                  "description": "Sends once at the given Unix epoch timestamp in milliseconds, passed as a string.",
+                  "value": {
+                    "jsonData": "{\"campaignType\":\"CSV\",\"campaignName\":\"diwali offer\",\"message\":{\"templateName\":\"welcome\",\"language\":\"en\"},\"schedule\":{\"exactDateTime\":\"1700003600000\"}}",
+                    "csvFile": "receiverNumber,Variable 1\n+919876543210,Sample Value 1\n+919876543211,Sample Value 2"
+                  }
+                },
+                "scheduledCampaignAfterDelay": {
+                  "summary": "Schedule a campaign to send after a delay",
+                  "description": "Sends once, 60 minutes after the campaign is created.",
+                  "value": {
+                    "jsonData": "{\"campaignType\":\"CSV\",\"campaignName\":\"reminder blast\",\"message\":{\"templateName\":\"welcome\",\"language\":\"en\"},\"schedule\":{\"delayInMinutes\":60}}",
+                    "csvFile": "receiverNumber,Variable 1\n+919876543210,Sample Value 1\n+919876543211,Sample Value 2"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Campaign created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Campaign"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Invalid parameters or CSV format",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - authentication missing, invalid, or expired",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedProblem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/whatsapp/schedule/campaign/list": {
+      "get": {
+        "tags": [
+          "Messages"
+        ],
+        "summary": "List scheduled campaigns",
+        "description": "List every campaign that still has a pending schedule for this phone number.\n\nCampaigns scheduled through this API send once, so they drop off this list after they have fired. Recurring campaigns stay listed until their schedule is cancelled - these cannot be created through this API, but existing ones appear here with `triggerType` set to `cron`. Campaigns created without a `schedule` never appear here.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/XPhoneId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Scheduled campaigns for this phone number. Returns an empty array when nothing is scheduled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ScheduledCampaign"
+                  }
+                },
+                "examples": {
+                  "scheduledCampaigns": {
+                    "summary": "One one-off and one recurring campaign",
+                    "value": [
+                      {
+                        "id": "000000000000000000000001",
+                        "name": "diwali offer",
+                        "campaignType": "CSV",
+                        "phoneNumberId": "123456789012345",
+                        "triggerType": "simple",
+                        "exactDateTime": 1700003600000,
+                        "fileUploadId": "000000000000000000000004",
+                        "jobNameSuffix": "_campaign",
+                        "lastUpdateTime": 1700000000000
+                      },
+                      {
+                        "id": "000000000000000000000001",
+                        "name": "daily digest",
+                        "campaignType": "CONTACT_FILTER",
+                        "phoneNumberId": "123456789012345",
+                        "triggerType": "cron",
+                        "cronExpression": "0 30 9 * * ?",
+                        "contactFilterId": "000000000000000000000005",
+                        "jobNameSuffix": "_campaign",
+                        "lastUpdateTime": 1700000000000
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - authentication missing, invalid, or expired",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedProblem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/whatsapp/schedule/campaign/{campaignId}": {
+      "delete": {
+        "tags": [
+          "Messages"
+        ],
+        "summary": "Cancel a scheduled campaign",
+        "description": "Cancel a campaign's pending schedule so it never sends.\n\nFor a recurring campaign this stops all future runs; messages already sent by earlier runs are not affected. This cancels the schedule only - it does not delete the campaign record itself.",
+        "parameters": [
+          {
+            "name": "campaignId",
+            "in": "path",
+            "required": true,
+            "description": "Id of the scheduled campaign, as returned in the `id` field by `GET /api/v1/whatsapp/schedule/campaign/list` or by the campaign creation response.",
+            "schema": {
+              "type": "string",
+              "example": "abcdef1234567890abcdef04"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/XPhoneId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Campaign schedule cancelled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                },
+                "examples": {
+                  "deleted": {
+                    "summary": "Schedule cancelled",
+                    "value": {
+                      "success": true,
+                      "message": "Campaign schedule deleted successfully."
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Campaign schedule deleted successfully."
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - authentication missing, invalid, or expired",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedProblem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/whatsapp/meta/media/upload": {
+      "post": {
+        "tags": [
+          "Media"
+        ],
+        "summary": "Upload media to WhatsApp and get metaMediaId",
+        "description": "Upload a file in Meta media format for later use in message or template APIs. The file is uploaded to WhatsApp and stored locally for reuse.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/XPhoneId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/MetaMediaUploadRequest"
+              },
+              "encoding": {
+                "file": {
+                  "contentType": "application/octet-stream"
+                }
+              },
+              "examples": {
+                "imageUpload": {
+                  "summary": "Upload an image file",
+                  "value": {
+                    "messaging_product": "whatsapp",
+                    "file": "(binary file)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Media uploaded successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadedFileResponse"
+                },
+                "example": {
+                  "id": "000000000000000000000001",
+                  "phoneNumberId": "123456789012345",
+                  "filename": "brochure.pdf",
+                  "localFilePath": "out/123456789012345/2025/03/brochure.pdf",
+                  "sha256": "a1b2c3d4e5f6",
+                  "use": "OUT",
+                  "metaMediaId": "120363401234567890",
+                  "mediaDetail": {
+                    "id": "000000000000000000000001",
+                    "url": "https://lookaside.fbsbx.com/whatsapp_business/attachments/...",
+                    "mimeType": "application/pdf",
+                    "sha256": "a1b2c3d4e5f6",
+                    "fileSize": 245678,
+                    "messaging_product": "whatsapp"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Invalid file upload",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - authentication missing, invalid, or expired",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedProblem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/whatsapp/media/mediaDetail/{metaMediaId}": {
+      "get": {
+        "tags": [
+          "Media"
+        ],
+        "summary": "Get media detail with reusable public file information",
+        "description": "Fetch stored media information by metaMediaId, including media metadata and reusable file access details.",
+        "parameters": [
+          {
+            "name": "metaMediaId",
+            "in": "path",
+            "required": true,
+            "description": "Meta media identifier returned by media upload APIs",
+            "schema": {
+              "type": "string",
+              "example": "120363401234567890"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/XPhoneId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Media detail retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadedFileOutsideSharedResponse"
+                },
+                "example": {
+                  "phoneNumberId": "123456789012345",
+                  "filename": "brochure.pdf",
+                  "thumbnail": "https://cdn.example.com/thumbs/brochure.png",
+                  "sha256": "a1b2c3d4e5f6",
+                  "s3Path": "s3://bucket/out/123456789012345/brochure.pdf",
+                  "metaMediaId": "120363401234567890",
+                  "mediaDetail": {
+                    "id": "000000000000000000000001",
+                    "url": "https://lookaside.fbsbx.com/whatsapp_business/attachments/...",
+                    "mimeType": "application/pdf",
+                    "sha256": "a1b2c3d4e5f6",
+                    "fileSize": 245678,
+                    "messaging_product": "whatsapp"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - authentication missing, invalid, or expired",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedProblem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Media not found"
+          }
+        }
+      }
+    },
+    "/api/v1/messageTemplate/create": {
+      "post": {
+        "tags": [
+          "Templates"
+        ],
+        "summary": "Create message template",
+        "description": "Create a new message template for WhatsApp Business. Templates must be approved before use.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/XPhoneId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTemplate"
+              },
+              "examples": {
+                "basicTemplate": {
+                  "summary": "Basic text template",
+                  "value": {
+                    "name": "hello_world",
+                    "language": "en",
+                    "category": "MARKETING",
+                    "components": [
+                      {
+                        "type": "BODY",
+                        "text": "Hello , welcome to our service!",
+                        "example": {
+                          "body_text": [
+                            [
+                              "John"
+                            ]
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                },
+                "templateWithMedia": {
+                  "summary": "Template with media header",
+                  "value": {
+                    "name": "promotion_template",
+                    "language": "en",
+                    "category": "MARKETING",
+                    "components": [
+                      {
+                        "type": "HEADER",
+                        "format": "IMAGE"
+                      },
+                      {
+                        "type": "BODY",
+                        "text": "Dear , check out our latest offers!",
+                        "example": {
+                          "body_text": [
+                            [
+                              "Customer"
+                            ]
+                          ]
+                        }
+                      },
+                      {
+                        "type": "FOOTER",
+                        "text": "Terms and conditions apply"
+                      }
+                    ]
+                  }
+                },
+                "flowTemplate": {
+                  "summary": "Template with flow button",
+                  "value": {
+                    "name": "registration_flow",
+                    "language": "en",
+                    "category": "UTILITY",
+                    "components": [
+                      {
+                        "type": "BODY",
+                        "text": "Dear , please complete your registration",
+                        "example": {
+                          "body_text": [
+                            [
+                              "User"
+                            ]
+                          ]
+                        }
+                      },
+                      {
+                        "type": "BUTTONS",
+                        "buttons": [
+                          {
+                            "type": "FLOW",
+                            "text": "Register Now",
+                            "flow_id": "1234567890123406",
+                            "navigate_screen": "REGISTRATION",
+                            "flow_action": "NAVIGATE"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Template submitted to Meta for review",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                },
+                "example": {
+                  "success": true,
+                  "message": "Message template created successfully"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/messageTemplate/getTemplates": {
+      "post": {
+        "tags": [
+          "Templates"
+        ],
+        "summary": "Get message templates",
+        "description": "Retrieve paginated list of message templates with filtering and sorting options.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/XPhoneId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TemplateListRequest"
+              },
+              "example": {
+                "pagination": {
+                  "current": 1,
+                  "pageSize": 10
+                },
+                "order": [
+                  {
+                    "fieldName": "creationTime",
+                    "dir": "desc"
+                  }
+                ],
+                "search": []
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Template list retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TemplateListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Invalid parameters",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - authentication missing, invalid, or expired",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedProblem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/messageTemplate/syncTemplatesFromMeta": {
+      "get": {
+        "tags": [
+          "Templates"
+        ],
+        "summary": "Sync templates from Meta",
+        "description": "Synchronize message templates from Meta WhatsApp Manager to the local system.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/XPhoneId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Templates synced. The handler returns null, so the response body is empty."
+          }
+        }
+      }
+    },
+    "/api/v1/whatsapp/syncTemplatesFromMeta": {
+      "get": {
+        "tags": [
+          "Templates"
+        ],
+        "summary": "Sync templates from Meta (WhatsApp endpoint)",
+        "description": "Synchronize message templates from Meta WhatsApp Manager to the local system via WhatsApp API endpoint.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/XPhoneId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Templates synced. The handler returns null, so the response body is empty."
+          },
+          "400": {
+            "description": "Bad request - Invalid parameters",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - authentication missing, invalid, or expired",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedProblem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/whatsapp/report/userMessageId/{id}": {
+      "get": {
+        "tags": [
+          "Reports"
+        ],
+        "summary": "Get report by user message ID",
+        "description": "Retrieve delivery report for a specific message using user-defined message ID.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "User-defined message ID",
+            "schema": {
+              "type": "string",
+              "example": "msg_12345"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/XPhoneId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Message report retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageReport"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/whatsapp/report/messageSentReport": {
+      "post": {
+        "tags": [
+          "Reports"
+        ],
+        "summary": "Get paginated message reports",
+        "description": "Retrieve sent message reports with pagination and filtering options.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/XPhoneId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PaginatedReportRequest"
+              },
+              "example": {
+                "pagination": {
+                  "current": 1,
+                  "pageSize": 50
+                },
+                "order": [
+                  {
+                    "fieldName": "creationTime",
+                    "dir": "desc"
+                  }
+                ],
+                "search": [
+                  {
+                    "fieldName": "creationTime",
+                    "value": [
+                      "1700000000000",
+                      "1700086400000"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Paginated message reports retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedReportResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/contact/list": {
+      "post": {
+        "tags": [
+          "Contacts"
+        ],
+        "summary": "Get contact list",
+        "description": "Retrieve paginated list of contacts with filtering and sorting options.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/XPhoneId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContactListRequest"
+              },
+              "example": {
+                "pagination": {
+                  "current": 1,
+                  "pageSize": 10
+                },
+                "order": [
+                  {
+                    "fieldName": "creationTime",
+                    "dir": "desc"
+                  }
+                ],
+                "search": [
+                  {
+                    "fieldName": "creationTime",
+                    "value": []
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Contact list retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContactListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Invalid parameters",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - authentication missing, invalid, or expired",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedProblem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/contact/save": {
+      "post": {
+        "tags": [
+          "Contacts"
+        ],
+        "summary": "Create or update contact",
+        "description": "Create a new contact or update existing contact. Attributes and labels are optional.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/XPhoneId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveContactRequest"
+              },
+              "examples": {
+                "basicContact": {
+                  "summary": "Basic contact with phone number only",
+                  "value": {
+                    "receiverNumber": 9876543210
+                  }
+                },
+                "contactWithAttributes": {
+                  "summary": "Contact with custom attributes",
+                  "value": {
+                    "receiverNumber": 9876543210,
+                    "attributes": {
+                      "abcdef1234567890abcdef01": "Jaipur"
+                    }
+                  }
+                },
+                "contactWithLabels": {
+                  "summary": "Contact with labels",
+                  "value": {
+                    "receiverNumber": 9876543210,
+                    "labels": [
+                      "abcdef1234567890abcdef02"
+                    ]
+                  }
+                },
+                "fullContact": {
+                  "summary": "Contact with attributes and labels",
+                  "value": {
+                    "receiverNumber": 9876543210,
+                    "attributes": {
+                      "abcdef1234567890abcdef01": "Jaipur",
+                      "name": "John Doe",
+                      "email": "john@example.com"
+                    },
+                    "labels": [
+                      "abcdef1234567890abcdef02",
+                      "abcdef1234567890abcdef03"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Contact saved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                },
+                "example": {
+                  "success": true,
+                  "message": "Contact saved successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Invalid parameters",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - authentication missing, invalid, or expired",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedProblem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/contact/upload": {
+      "post": {
+        "tags": [
+          "Contacts"
+        ],
+        "summary": "Bulk create or import contacts from CSV",
+        "description": "Import or update contacts from a CSV file with required 'receiverNumber' and optional attribute columns.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/XPhoneId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/ContactCsvImportRequest"
+              },
+              "encoding": {
+                "file": {
+                  "contentType": "text/csv"
+                }
+              },
+              "examples": {
+                "contactImportCsv": {
+                  "summary": "CSV file with receiver number and attribute columns",
+                  "value": {
+                    "file": "receiverNumber,name,email\n+919876543210,John Doe,john@example.com\n+919876543211,Jane Doe,jane@example.com"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "CSV upload accepted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                },
+                "example": {
+                  "success": true,
+                  "message": "Upload is under process, please check after sometime."
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Invalid file or CSV format",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - authentication missing, invalid, or expired",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedProblem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/user/agent": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Create agent",
+        "description": "Create a new agent/basic user for the current customer. The backend sets customerId, initializes twoFactor.enabled to false, and decides the final active value based on agent limit rules.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/XPhoneId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAgentRequest"
+              },
+              "example": {
+                "username": "alex_agent",
+                "name": "Alex Agent",
+                "password": "Test@1234",
+                "email": "alex.agent@example.com",
+                "mobileNumber": "9876543210",
+                "role": "AGENT",
+                "phoneNumberIds": [
+                  "123456789012345"
+                ],
+                "active": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Agent created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateAgentResponse"
+                },
+                "example": {
+                  "id": "000000000000000000000001",
+                  "customerId": "000000000000000000000009",
+                  "phoneNumberIds": [
+                    "123456789012345"
+                  ],
+                  "name": "Alex Agent",
+                  "username": "alex_agent",
+                  "password": null,
+                  "email": "alex.agent@example.com",
+                  "mobileNumber": "9876543210",
+                  "role": "AGENT",
+                  "active": true,
+                  "twoFactor": {
+                    "enabled": false
+                  },
+                  "creationTime": 1700000000000,
+                  "lastUpdateTime": 1700000000000
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Invalid payload or username already exists",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - authentication missing, invalid, or expired",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedProblem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/user/agent-list": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "List active agents for dropdown",
+        "description": "Retrieve active agents for the current customer, optimized for dropdown selection in assignment workflows.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/XPhoneId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Active agents retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BasicUserDropdownItem"
+                  }
+                },
+                "example": [
+                  {
+                    "id": "000000000000000000000001",
+                    "name": "John Agent",
+                    "username": "john_agent"
+                  },
+                  {
+                    "id": "000000000000000000000001",
+                    "name": "Priya Support",
+                    "username": "priya_support"
+                  }
+                ]
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - authentication missing, invalid, or expired",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedProblem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/user/team-list": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "List teams for dropdown",
+        "description": "Retrieve team id and name pairs for the current customer, optimized for assignment and selection workflows.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/XPhoneId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Teams retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TeamDropdownItem"
+                  }
+                },
+                "example": [
+                  {
+                    "id": "000000000000000000000001",
+                    "name": "Sales Team"
+                  },
+                  {
+                    "id": "000000000000000000000001",
+                    "name": "Support Team"
+                  }
+                ]
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - authentication missing, invalid, or expired",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedProblem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/user/teams": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "List teams",
+        "description": "Retrieve all teams for the current customer.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/XPhoneId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Teams retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TeamResponse"
+                  }
+                },
+                "example": [
+                  {
+                    "id": "000000000000000000000001",
+                    "customerId": "000000000000000000000009",
+                    "name": "Sales Team",
+                    "defaultTeam": false,
+                    "memberUsernames": [
+                      "john_agent",
+                      "priya_support"
+                    ],
+                    "createdBy": "admin_user",
+                    "creationTime": "2025-03-20T10:30:00Z",
+                    "lastModifiedBy": "admin_user",
+                    "lastUpdateTime": "2025-03-20T10:45:00Z"
+                  }
+                ]
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - authentication missing, invalid, or expired",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedProblem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/whatsapp/chat/assignment": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Assign chat to agent or team",
+        "description": "Assign a chat by receiver number to a team, a specific user, or by round robin. Required fields depend on target: TEAM requires teamId, USER requires username, ROUND_ROBIN can optionally use teamId and source. phoneNumberId is derived from the authenticated user and does not need to be sent.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/XPhoneId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatAssignmentRequest"
+              },
+              "examples": {
+                "assignToTeam": {
+                  "summary": "Assign chat to a team",
+                  "value": {
+                    "receiverNumber": "919876543210",
+                    "target": "TEAM",
+                    "teamId": "00000000000000000000000a"
+                  }
+                },
+                "assignToUser": {
+                  "summary": "Assign chat to a specific agent",
+                  "value": {
+                    "receiverNumber": "919876543210",
+                    "target": "USER",
+                    "username": "john_agent",
+                    "assignTeam": true
+                  }
+                },
+                "assignRoundRobin": {
+                  "summary": "Assign chat using round robin",
+                  "value": {
+                    "receiverNumber": "919876543210",
+                    "target": "ROUND_ROBIN",
+                    "teamId": "00000000000000000000000a"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Assignment applied synchronously",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkOperationResponse"
+                },
+                "example": {
+                  "mode": "SYNC",
+                  "affectedCount": 42,
+                  "durationMs": 128
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Invalid assignment payload",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - authentication missing, invalid, or expired",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedProblem"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Assignment accepted as a background operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkOperationResponse"
+                },
+                "example": {
+                  "mode": "ASYNC",
+                  "operationId": "00000000000000000000000b"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "XPhoneId": {
+        "name": "x-phone-id",
+        "in": "header",
+        "description": "Phone ID identifying the WABA tenant. Optional when the account has a single phone number (auto-resolved); required when multiple numbers exist. May also be passed as ?phoneId=... query parameter.",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "example": "123456789012345"
+        }
+      }
+    },
+    "securitySchemes": {
+      "BasicAuth": {
+        "type": "http",
+        "scheme": "basic",
+        "description": "Basic HTTP authentication with username and password"
+      },
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-api-key",
+        "description": "API key authentication via header"
+      },
+      "ApiKeyQuery": {
+        "type": "apiKey",
+        "in": "query",
+        "name": "apiKey",
+        "description": "API key authentication via query parameter"
+      }
+    },
+    "schemas": {
+      "TextMessage": {
+        "type": "object",
+        "required": [
+          "to",
+          "text"
+        ],
+        "properties": {
+          "to": {
+            "type": "string",
+            "description": "Recipient phone number with country code",
+            "example": "1234567890"
+          },
+          "text": {
+            "type": "string",
+            "description": "Message text content",
+            "example": "Hello, this is a test message!"
+          },
+          "userMessageId": {
+            "type": "string",
+            "description": "Optional unique identifier for tracking",
+            "example": "msg_12345"
+          }
+        }
+      },
+      "TemplateMessage": {
+        "type": "object",
+        "required": [
+          "templateName",
+          "language",
+          "to"
+        ],
+        "properties": {
+          "templateName": {
+            "type": "string",
+            "description": "Name of the approved template",
+            "example": "hello_world"
+          },
+          "language": {
+            "type": "string",
+            "description": "Template language code",
+            "example": "en"
+          },
+          "to": {
+            "type": "string",
+            "description": "Recipient phone number",
+            "example": "1234567890"
+          },
+          "templateVariables": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Variables to replace in template",
+            "example": [
+              "John",
+              "Doe"
+            ]
+          },
+          "metaMediaId": {
+            "type": "string",
+            "description": "Meta Media ID for media files uploaded to WhatsApp Business API",
+            "example": "120363401234567890"
+          },
+          "fileUrl": {
+            "type": "string",
+            "description": "URL of media file for templates with media",
+            "example": "https://example.com/image.jpg"
+          },
+          "base64File": {
+            "$ref": "#/components/schemas/Base64File"
+          },
+          "ftpFilePath": {
+            "type": "string",
+            "description": "FTP path for file upload",
+            "example": "uploads/document.pdf"
+          },
+          "location": {
+            "$ref": "#/components/schemas/Location"
+          },
+          "flow": {
+            "$ref": "#/components/schemas/Flow"
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "fileUrl": {
+                      "type": "string"
+                    }
+                  }
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "base64File": {
+                      "$ref": "#/components/schemas/Base64File"
+                    }
+                  }
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "ftpFilePath": {
+                      "type": "string"
+                    }
+                  }
+                }
+              ]
+            },
+            "description": "Array of files for carousel templates"
+          },
+          "orderDetail": {
+            "$ref": "#/components/schemas/OrderDetail"
+          }
+        }
+      },
+      "OrderDetail": {
+        "type": "object",
+        "description": "Payment order detail block. Required fields: body, footer, goodsType, configuration_name, items[]. Optional: headerImageLink, tax, taxDescription, discount, shipping, subtotal, total_amount, expiration.timestamp, expiration.description.",
+        "required": [
+          "body",
+          "footer",
+          "goodsType",
+          "configuration_name",
+          "items"
+        ],
+        "properties": {
+          "headerImageLink": {
+            "type": "string",
+            "description": "(Optional) Header image URL",
+            "example": "https://example.com/image.png"
+          },
+          "body": {
+            "type": "string",
+            "description": "(Required) Body text",
+            "example": "Thank you for shopping with us"
+          },
+          "footer": {
+            "type": "string",
+            "description": "(Required) Footer / CTA text",
+            "example": "Pay for your order"
+          },
+          "goodsType": {
+            "type": "string",
+            "description": "(Required) Type of goods (digital-goods or physical-goods)",
+            "example": "digital-goods"
+          },
+          "configuration_name": {
+            "type": "string",
+            "description": "(Required) Dynamic config name from GET /api/v1/whatsapp/metaPayment/configs/active",
+            "example": "test-rz"
+          },
+          "tax": {
+            "type": "string",
+            "description": "(Optional) Tax amount",
+            "example": "2"
+          },
+          "taxDescription": {
+            "type": "string",
+            "description": "(Optional) Tax description",
+            "example": "Sales Tax"
+          },
+          "discount": {
+            "type": "string",
+            "description": "(Optional) Discount amount",
+            "example": "1"
+          },
+          "shipping": {
+            "type": "string",
+            "description": "(Optional) Shipping charge",
+            "example": "1"
+          },
+          "subtotal": {
+            "type": "number",
+            "description": "(Optional) Subtotal override",
+            "example": 8
+          },
+          "total_amount": {
+            "type": "number",
+            "description": "(Optional) Final total override",
+            "example": 10
+          },
+          "items": {
+            "type": "array",
+            "description": "(Required) Line items (each requires name, amount, quantity)",
+            "items": {
+              "type": "object",
+              "required": [
+                "name",
+                "amount",
+                "quantity"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "example": "OS TEN-91 66804"
+                },
+                "amount": {
+                  "type": "string",
+                  "description": "Amount per unit",
+                  "example": "8"
+                },
+                "quantity": {
+                  "type": "string",
+                  "example": "1"
+                }
+              }
+            }
+          },
+          "expiration": {
+            "type": "object",
+            "description": "(Optional) Expiration block",
+            "properties": {
+              "timestamp": {
+                "type": "string",
+                "description": "Unix timestamp (seconds)",
+                "example": "1756570984"
+              },
+              "description": {
+                "type": "string",
+                "example": "Offer expires at the end of the year"
+              }
+            }
+          }
+        }
+      },
+      "PaymentMessage": {
+        "type": "object",
+        "required": [
+          "to",
+          "orderDetail"
+        ],
+        "properties": {
+          "to": {
+            "type": "string",
+            "description": "Recipient phone number",
+            "example": "1234567890"
+          },
+          "orderDetail": {
+            "$ref": "#/components/schemas/OrderDetail"
+          }
+        }
+      },
+      "MediaMessage": {
+        "type": "object",
+        "required": [
+          "to"
+        ],
+        "oneOf": [
+          {
+            "required": [
+              "fileUrl"
+            ]
+          },
+          {
+            "required": [
+              "base64File"
+            ]
+          },
+          {
+            "required": [
+              "ftpFilePath"
+            ]
+          },
+          {
+            "required": [
+              "metaMediaId"
+            ]
+          }
+        ],
+        "properties": {
+          "to": {
+            "type": "string",
+            "description": "Recipient phone number",
+            "example": "1234567890"
+          },
+          "metaMediaId": {
+            "type": "string",
+            "description": "Meta Media ID for files uploaded to WhatsApp Business API",
+            "example": "120363401234567890"
+          },
+          "fileUrl": {
+            "type": "string",
+            "description": "URL of the media file",
+            "example": "https://example.com/image.jpg"
+          },
+          "base64File": {
+            "$ref": "#/components/schemas/Base64File"
+          },
+          "ftpFilePath": {
+            "type": "string",
+            "description": "FTP file path",
+            "example": "uploads/image.jpg"
+          },
+          "caption": {
+            "type": "string",
+            "description": "Optional caption for media",
+            "example": "Check out this image!"
+          }
+        }
+      },
+      "ListButtonMessage": {
+        "type": "object",
+        "required": [
+          "to",
+          "listButton"
+        ],
+        "properties": {
+          "to": {
+            "type": "string",
+            "example": "1234567890"
+          },
+          "listButton": {
+            "type": "object",
+            "required": [
+              "button",
+              "sections"
+            ],
+            "properties": {
+              "header": {
+                "type": "string",
+                "example": "Welcome to our store"
+              },
+              "body": {
+                "type": "string",
+                "example": "Please select an item"
+              },
+              "footer": {
+                "type": "string",
+                "example": "Thank you"
+              },
+              "button": {
+                "type": "string",
+                "example": "Select Item"
+              },
+              "sections": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "title": {
+                      "type": "string",
+                      "example": "Category"
+                    },
+                    "rows": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "title": {
+                            "type": "string",
+                            "example": "Item Name"
+                          },
+                          "description": {
+                            "type": "string",
+                            "example": "Item description"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "ReplyButtonMessage": {
+        "type": "object",
+        "required": [
+          "to",
+          "replyButton"
+        ],
+        "properties": {
+          "to": {
+            "type": "string",
+            "example": "1234567890"
+          },
+          "replyButton": {
+            "type": "object",
+            "properties": {
+              "header": {
+                "type": "string",
+                "example": "Welcome"
+              },
+              "body": {
+                "type": "string",
+                "example": "Please choose an option"
+              },
+              "footer": {
+                "type": "string",
+                "example": "Thank you"
+              },
+              "buttons": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "example": "btn_1"
+                    },
+                    "title": {
+                      "type": "string",
+                      "example": "Option 1"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "metaMediaId": {
+            "type": "string",
+            "description": "Meta Media ID for files uploaded to WhatsApp Business API",
+            "example": "120363401234567890"
+          },
+          "fileUrl": {
+            "type": "string"
+          },
+          "base64File": {
+            "$ref": "#/components/schemas/Base64File"
+          }
+        }
+      },
+      "CtaUrlMessage": {
+        "type": "object",
+        "required": [
+          "to",
+          "ctaUrl"
+        ],
+        "properties": {
+          "to": {
+            "type": "string",
+            "example": "1234567890"
+          },
+          "ctaUrl": {
+            "type": "object",
+            "properties": {
+              "header": {
+                "type": "string",
+                "example": "Visit Our Website"
+              },
+              "body": {
+                "type": "string",
+                "example": "Click the button below to visit our website"
+              },
+              "footer": {
+                "type": "string",
+                "example": "Thank you"
+              },
+              "button": {
+                "type": "string",
+                "example": "Visit Website"
+              },
+              "url": {
+                "type": "string",
+                "example": "https://example.com"
+              }
+            }
+          }
+        }
+      },
+      "CatalogMessage": {
+        "type": "object",
+        "required": [
+          "to",
+          "catalog"
+        ],
+        "properties": {
+          "to": {
+            "type": "string",
+            "example": "1234567890"
+          },
+          "catalog": {
+            "type": "object",
+            "properties": {
+              "body": {
+                "type": "string",
+                "example": "Check out our products"
+              },
+              "footer": {
+                "type": "string",
+                "example": "Thank you for shopping"
+              },
+              "thumbnailProductRetailerId": {
+                "type": "string",
+                "example": "product_123"
+              }
+            }
+          }
+        }
+      },
+      "ProductMessage": {
+        "type": "object",
+        "required": [
+          "to",
+          "product"
+        ],
+        "properties": {
+          "to": {
+            "type": "string",
+            "example": "1234567890"
+          },
+          "product": {
+            "type": "object",
+            "properties": {
+              "header": {
+                "type": "string",
+                "example": "Our Products"
+              },
+              "body": {
+                "type": "string",
+                "example": "Check out these items"
+              },
+              "footer": {
+                "type": "string",
+                "example": "Visit again"
+              },
+              "catalogId": {
+                "type": "string",
+                "example": "1234567890123407"
+              },
+              "sections": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "title": {
+                      "type": "string",
+                      "example": "Electronics"
+                    },
+                    "productItems": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "productRetailerId": {
+                            "type": "string",
+                            "example": "product_123"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "LocationMessage": {
+        "type": "object",
+        "required": [
+          "to",
+          "location"
+        ],
+        "properties": {
+          "to": {
+            "type": "string",
+            "example": "1234567890"
+          },
+          "location": {
+            "$ref": "#/components/schemas/Location"
+          }
+        }
+      },
+      "ContactMessage": {
+        "type": "object",
+        "required": [
+          "to",
+          "contacts"
+        ],
+        "properties": {
+          "to": {
+            "type": "string",
+            "example": "1234567890"
+          },
+          "contacts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Contact"
+            }
+          }
+        }
+      },
+      "LocationRequestMessage": {
+        "type": "object",
+        "required": [
+          "to",
+          "locationRequest",
+          "text"
+        ],
+        "properties": {
+          "to": {
+            "type": "string",
+            "description": "Recipient phone number",
+            "example": "1234567890"
+          },
+          "locationRequest": {
+            "type": "boolean",
+            "description": "Flag to request location from user",
+            "example": true
+          },
+          "text": {
+            "type": "string",
+            "description": "Message text requesting location",
+            "example": "Could you pls share your location"
+          }
+        }
+      },
+      "AddressRequestMessage": {
+        "type": "object",
+        "required": [
+          "to",
+          "address"
+        ],
+        "properties": {
+          "to": {
+            "type": "string",
+            "description": "Recipient phone number",
+            "example": "1234567890"
+          },
+          "address": {
+            "type": "object",
+            "properties": {
+              "header": {
+                "type": "string",
+                "example": "Good Morning"
+              },
+              "body": {
+                "type": "string",
+                "example": "please share your address so we can processed further"
+              },
+              "footer": {
+                "type": "string",
+                "example": "STOP to unsubscribe"
+              }
+            }
+          }
+        }
+      },
+      "MultipartMessage": {
+        "type": "object",
+        "required": [
+          "to"
+        ],
+        "properties": {
+          "to": {
+            "type": "string",
+            "description": "Recipient phone number"
+          },
+          "uploadFile": {
+            "type": "string",
+            "format": "binary",
+            "description": "File to upload"
+          }
+        }
+      },
+      "CampaignData": {
+        "type": "object",
+        "required": [
+          "campaignType",
+          "campaignName",
+          "message"
+        ],
+        "properties": {
+          "campaignType": {
+            "type": "string",
+            "enum": [
+              "CSV"
+            ],
+            "description": "Type of campaign",
+            "example": "CSV"
+          },
+          "campaignName": {
+            "type": "string",
+            "description": "Name for the campaign",
+            "example": "swagger api test"
+          },
+          "message": {
+            "type": "object",
+            "required": [
+              "templateName",
+              "language"
+            ],
+            "properties": {
+              "templateName": {
+                "type": "string",
+                "description": "Name of the approved template to use",
+                "example": "welcome"
+              },
+              "language": {
+                "type": "string",
+                "description": "Template language code",
+                "example": "en"
+              }
+            }
+          },
+          "schedule": {
+            "$ref": "#/components/schemas/CampaignSchedule"
+          }
+        }
+      },
+      "CampaignSchedule": {
+        "type": "object",
+        "description": "Optional schedule for a campaign. Omit this field to send immediately. For one-off schedules, set exactly one of `exactDateTime` or `delayInMinutes`; if both are set, `exactDateTime` takes precedence. `cronExpression` is returned for pre-existing recurring campaigns but is not accepted when creating a campaign.",
+        "properties": {
+          "exactDateTime": {
+            "type": "string",
+            "description": "Send once at this instant, given as a Unix epoch timestamp in milliseconds and passed as a string. A timestamp in the past causes the campaign to send immediately.",
+            "example": "1700003600000"
+          },
+          "delayInMinutes": {
+            "type": "integer",
+            "description": "Send once after this many minutes have elapsed from the moment the campaign is created. Must be greater than 0.",
+            "example": 60
+          },
+          "cronExpression": {
+            "type": "string",
+            "description": "Recurring Quartz expression returned for existing cron-scheduled campaigns; omit it when creating a campaign.",
+            "example": "0 30 9 * * ?"
+          }
+        }
+      },
+      "ScheduledCampaign": {
+        "type": "object",
+        "description": "One scheduled Quartz job. The keys below are the usual ones, but the map is free-form.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Campaign id. Pass this as `campaignId` to cancel the schedule.",
+            "example": "000000000000000000000002"
+          },
+          "name": {
+            "type": "string",
+            "description": "Campaign name given at creation time",
+            "example": "diwali offer"
+          },
+          "campaignType": {
+            "type": "string",
+            "enum": [
+              "CSV",
+              "CONTACT_FILTER",
+              "REPORT_FILTER",
+              "DRIP"
+            ],
+            "description": "How the campaign's recipients are resolved",
+            "example": "CSV"
+          },
+          "phoneNumberId": {
+            "type": "string",
+            "description": "Phone ID the campaign belongs to",
+            "example": "123456789012345"
+          },
+          "triggerType": {
+            "type": "string",
+            "enum": [
+              "cron",
+              "simple",
+              "unknown"
+            ],
+            "description": "Quartz trigger type.",
+            "example": "simple"
+          },
+          "exactDateTime": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Trigger start time for `simple` triggers; null for `cron` triggers. Epoch milliseconds.",
+            "example": 1755600000000
+          },
+          "cronExpression": {
+            "type": "string",
+            "description": "Cron expression for `cron` triggers; null for `simple` triggers.",
+            "example": "0 30 9 * * ?"
+          },
+          "fileUploadId": {
+            "type": "string",
+            "description": "Id of the uploaded CSV backing a `CSV` campaign. Omitted for other campaign types.",
+            "example": "000000000000000000000004"
+          },
+          "contactFilterId": {
+            "type": "string",
+            "description": "Id of the contact filter backing a `CONTACT_FILTER` campaign. Omitted for other campaign types.",
+            "example": "000000000000000000000005"
+          },
+          "lastUpdateTime": {
+            "type": "integer",
+            "format": "int64",
+            "description": "When the schedule was created or last updated, as a Unix epoch timestamp in milliseconds.",
+            "example": 1700000000000
+          },
+          "jobNameSuffix": {
+            "type": "string",
+            "description": "Internal scheduler discriminator. Always `_campaign` for campaign schedules.",
+            "example": "_campaign"
+          }
+        },
+        "additionalProperties": true
+      },
+      "Base64File": {
+        "type": "object",
+        "required": [
+          "name",
+          "body"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "File name with extension",
+            "example": "document.pdf"
+          },
+          "body": {
+            "type": "string",
+            "description": "Base64 encoded file content (without data URI prefix)",
+            "example": "JVBERi0xLjEKJcKlwrHDqwoKMSAwIG9iag..."
+          }
+        }
+      },
+      "MetaMediaUploadRequest": {
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "properties": {
+          "messaging_product": {
+            "type": "string",
+            "description": "Messaging product identifier. Defaults to whatsapp.",
+            "example": "whatsapp"
+          },
+          "file": {
+            "type": "string",
+            "format": "binary",
+            "description": "Binary file to upload to WhatsApp media storage"
+          }
+        }
+      },
+      "MediaDetailResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "120363401234567890"
+          },
+          "url": {
+            "type": "string",
+            "example": "https://lookaside.fbsbx.com/whatsapp_business/attachments/..."
+          },
+          "mimeType": {
+            "type": "string",
+            "description": "Detected Meta media MIME type",
+            "example": "application/pdf"
+          },
+          "sha256": {
+            "type": "string",
+            "example": "a1b2c3d4e5f6"
+          },
+          "fileSize": {
+            "type": "integer",
+            "format": "int64",
+            "example": 245678
+          },
+          "messaging_product": {
+            "type": "string",
+            "example": "whatsapp"
+          }
+        }
+      },
+      "UploadedFileResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "000000000000000000000006"
+          },
+          "phoneNumberId": {
+            "type": "string",
+            "example": "123456789012345"
+          },
+          "filename": {
+            "type": "string",
+            "example": "brochure.pdf"
+          },
+          "localFilePath": {
+            "type": "string",
+            "example": "out/123456789012345/2025/03/brochure.pdf"
+          },
+          "thumbnail": {
+            "type": "string",
+            "example": "https://cdn.example.com/thumbs/brochure.png"
+          },
+          "sha256": {
+            "type": "string",
+            "example": "a1b2c3d4e5f6"
+          },
+          "s3Path": {
+            "type": "string",
+            "example": "s3://bucket/out/123456789012345/brochure.pdf"
+          },
+          "use": {
+            "type": "string",
+            "enum": [
+              "IN",
+              "OUT",
+              "PRE_COMPOSED_MESSAGE",
+              "CATALOG",
+              "CSV",
+              "SMB_MESSAGE_ECHOES",
+              "PROFILE_PICTURE"
+            ],
+            "example": "OUT"
+          },
+          "metaMediaId": {
+            "type": "string",
+            "example": "120363401234567890"
+          },
+          "mediaDetail": {
+            "$ref": "#/components/schemas/MediaDetailResponse"
+          },
+          "creationTime": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Epoch milliseconds.",
+            "example": 1755600000000
+          }
+        }
+      },
+      "UploadedFileOutsideSharedResponse": {
+        "type": "object",
+        "properties": {
+          "phoneNumberId": {
+            "type": "string",
+            "example": "123456789012345"
+          },
+          "filename": {
+            "type": "string",
+            "example": "brochure.pdf"
+          },
+          "thumbnail": {
+            "type": "string",
+            "example": "https://cdn.example.com/thumbs/brochure.png"
+          },
+          "sha256": {
+            "type": "string",
+            "example": "a1b2c3d4e5f6"
+          },
+          "s3Path": {
+            "type": "string",
+            "example": "s3://bucket/out/123456789012345/brochure.pdf"
+          },
+          "metaMediaId": {
+            "type": "string",
+            "example": "120363401234567890"
+          },
+          "mediaDetail": {
+            "$ref": "#/components/schemas/MediaDetailResponse"
+          }
+        }
+      },
+      "Location": {
+        "type": "object",
+        "required": [
+          "longitude",
+          "latitude"
+        ],
+        "properties": {
+          "longitude": {
+            "type": "string",
+            "example": "77.18538916767386"
+          },
+          "latitude": {
+            "type": "string",
+            "example": "28.524369327581365"
+          },
+          "name": {
+            "type": "string",
+            "example": "Location Name"
+          },
+          "address": {
+            "type": "string",
+            "example": "Full address of the location"
+          }
+        }
+      },
+      "Flow": {
+        "type": "object",
+        "properties": {
+          "flow_token": {
+            "type": "string",
+            "description": "Optional flow token",
+            "example": "token_123"
+          },
+          "flow_action_data": {
+            "type": "object",
+            "description": "Optional flow action data",
+            "properties": {
+              "firstName": {
+                "type": "string",
+                "example": "John"
+              },
+              "email": {
+                "type": "string",
+                "example": "john@example.com"
+              }
+            }
+          }
+        }
+      },
+      "Contact": {
+        "type": "object",
+        "required": [
+          "name",
+          "phones"
+        ],
+        "properties": {
+          "addresses": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "street": {
+                  "type": "string",
+                  "example": "123 Main St"
+                },
+                "city": {
+                  "type": "string",
+                  "example": "New York"
+                },
+                "state": {
+                  "type": "string",
+                  "example": "NY"
+                },
+                "zip": {
+                  "type": "string",
+                  "example": "10001"
+                },
+                "country": {
+                  "type": "string",
+                  "example": "United States"
+                },
+                "countryCode": {
+                  "type": "string",
+                  "example": "1"
+                },
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "HOME",
+                    "WORK"
+                  ],
+                  "example": "WORK"
+                }
+              }
+            }
+          },
+          "birthday": {
+            "type": "string",
+            "format": "date",
+            "example": "1990-01-01"
+          },
+          "emails": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "type": "string",
+                  "example": "contact@example.com"
+                },
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "HOME",
+                    "WORK"
+                  ],
+                  "example": "WORK"
+                }
+              }
+            }
+          },
+          "name": {
+            "type": "object",
+            "required": [
+              "formattedName"
+            ],
+            "properties": {
+              "formattedName": {
+                "type": "string",
+                "example": "John Doe"
+              },
+              "firstName": {
+                "type": "string",
+                "example": "John"
+              },
+              "lastName": {
+                "type": "string",
+                "example": "Doe"
+              },
+              "middleName": {
+                "type": "string",
+                "example": "Michael"
+              },
+              "suffix": {
+                "type": "string",
+                "example": "Jr."
+              },
+              "prefix": {
+                "type": "string",
+                "example": "Mr."
+              }
+            }
+          },
+          "org": {
+            "type": "object",
+            "properties": {
+              "company": {
+                "type": "string",
+                "example": "Example Corp"
+              },
+              "department": {
+                "type": "string",
+                "example": "Engineering"
+              },
+              "title": {
+                "type": "string",
+                "example": "Software Engineer"
+              }
+            }
+          },
+          "phones": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "phone"
+              ],
+              "properties": {
+                "phone": {
+                  "type": "string",
+                  "example": "1234567890"
+                },
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "HOME",
+                    "WORK",
+                    "MOBILE",
+                    "MAIN"
+                  ],
+                  "example": "MOBILE"
+                },
+                "waId": {
+                  "type": "string",
+                  "example": "919876543210"
+                }
+              }
+            }
+          },
+          "urls": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "url": {
+                  "type": "string",
+                  "example": "https://example.com"
+                },
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "HOME",
+                    "WORK"
+                  ],
+                  "example": "WORK"
+                }
+              }
+            }
+          }
+        }
+      },
+      "CreateTemplate": {
+        "type": "object",
+        "required": [
+          "name",
+          "language",
+          "components",
+          "category"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Template name (lowercase, no spaces, underscores allowed)",
+            "example": "hello_world"
+          },
+          "language": {
+            "type": "string",
+            "description": "Language code",
+            "example": "en"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "MARKETING",
+              "UTILITY",
+              "AUTHENTICATION"
+            ],
+            "example": "MARKETING"
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TemplateComponent"
+            }
+          }
+        }
+      },
+      "TemplateComponent": {
+        "type": "object",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "HEADER",
+              "BODY",
+              "FOOTER",
+              "BUTTONS"
+            ]
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "TEXT",
+              "IMAGE",
+              "VIDEO",
+              "DOCUMENT"
+            ],
+            "description": "Required for HEADER type"
+          },
+          "text": {
+            "type": "string",
+            "description": "Text content with variable placeholders like ",
+            "example": "Hello , welcome to our service!"
+          },
+          "example": {
+            "type": "object",
+            "properties": {
+              "body_text": {
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "example": [
+                  [
+                    "John",
+                    "Doe"
+                  ]
+                ]
+              }
+            }
+          },
+          "buttons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TemplateButton"
+            }
+          }
+        }
+      },
+      "TemplateButton": {
+        "type": "object",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "FLOW",
+              "CATALOG",
+              "URL",
+              "PHONE_NUMBER",
+              "QUICK_REPLY"
+            ]
+          },
+          "text": {
+            "type": "string",
+            "example": "Click Here"
+          },
+          "flow_id": {
+            "type": "string",
+            "description": "Required for FLOW type",
+            "example": "1234567890123406"
+          },
+          "navigate_screen": {
+            "type": "string",
+            "description": "Screen to navigate to for FLOW type",
+            "example": "REGISTRATION"
+          },
+          "flow_action": {
+            "type": "string",
+            "enum": [
+              "NAVIGATE",
+              "DATA_EXCHANGE"
+            ],
+            "default": "NAVIGATE"
+          },
+          "url": {
+            "type": "string",
+            "description": "URL for URL type buttons",
+            "example": "https://example.com"
+          },
+          "phone_number": {
+            "type": "string",
+            "description": "Phone number for PHONE_NUMBER type",
+            "example": "+1234567890"
+          }
+        }
+      },
+      "TemplateListRequest": {
+        "type": "object",
+        "properties": {
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "current": {
+                "type": "integer",
+                "example": 1
+              },
+              "pageSize": {
+                "type": "integer",
+                "example": 10
+              }
+            }
+          },
+          "order": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "fieldName": {
+                  "type": "string",
+                  "example": "creationTime"
+                },
+                "dir": {
+                  "type": "string",
+                  "enum": [
+                    "asc",
+                    "desc"
+                  ],
+                  "example": "desc"
+                }
+              }
+            }
+          },
+          "search": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "fieldName": {
+                  "type": "string",
+                  "example": "templateName"
+                },
+                "value": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "example": [
+                    "searchValue"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "TemplateListResponse": {
+        "type": "object",
+        "description": "Paginated template list. `results` is omitted when nothing matched.",
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MessageTemplate"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Total records matching the query across all pages.",
+            "example": 150
+          },
+          "metadata": {
+            "type": "object",
+            "properties": {
+              "totalRecords": {
+                "type": "integer",
+                "format": "int64",
+                "example": 150
+              }
+            }
+          }
+        }
+      },
+      "PaginatedReportRequest": {
+        "type": "object",
+        "properties": {
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "current": {
+                "type": "integer",
+                "example": 1
+              },
+              "pageSize": {
+                "type": "integer",
+                "example": 50
+              }
+            }
+          },
+          "order": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "fieldName": {
+                  "type": "string",
+                  "example": "creationTime"
+                },
+                "dir": {
+                  "type": "string",
+                  "enum": [
+                    "asc",
+                    "desc"
+                  ],
+                  "example": "desc"
+                }
+              }
+            }
+          },
+          "search": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "fieldName": {
+                  "type": "string",
+                  "example": "creationTime"
+                },
+                "value": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "example": [
+                    "1700000000000",
+                    "1700086400000"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "SendMessageResponse": {
+        "type": "object",
+        "description": "Null fields are omitted. `error` is returned with HTTP 200 only when the send is blocked before it reaches Meta - insufficient wallet balance, or an opted-out receiver. A rejection by Meta returns HTTP 400 instead.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Id of the stored message record. Use it to correlate the send with delivery-status webhooks and message reports.",
+            "example": "000000000000000000000001"
+          },
+          "userMessageId": {
+            "type": "string",
+            "description": "Caller-supplied correlation id, echoed back only when it was set on the request.",
+            "example": "msg_12345"
+          },
+          "waMessageId": {
+            "type": "string",
+            "description": "WhatsApp message id assigned by Meta. Absent when the message was not accepted.",
+            "example": "wamid.HBgMOTE5ODc2NTQzMjEwFQIAERgSQkY2RjE4Q0Q0NTY3ODkwMTIA"
+          },
+          "error": {
+            "$ref": "#/components/schemas/MetaError"
+          }
+        }
+      },
+      "MetaError": {
+        "type": "object",
+        "description": "Why the send was blocked. `code` is 0 for the checks this platform makes before calling Meta.",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "example": 0
+          },
+          "title": {
+            "type": "string",
+            "example": "Insufficient Balance"
+          },
+          "message": {
+            "type": "string",
+            "example": "Not enough balance to send the message."
+          },
+          "details": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "href": {
+            "type": "string"
+          },
+          "errorSubcode": {
+            "type": "integer"
+          },
+          "fbtraceId": {
+            "type": "string"
+          },
+          "errorData": {
+            "type": "object",
+            "properties": {
+              "details": {
+                "type": "string",
+                "example": "Please recharge your wallet and try again."
+              },
+              "messaging_product": {
+                "type": "string",
+                "example": "whatsapp"
+              }
+            }
+          }
+        }
+      },
+      "BasicUserDropdownItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "000000000000000000000008"
+          },
+          "name": {
+            "type": "string",
+            "example": "John Agent"
+          },
+          "username": {
+            "type": "string",
+            "example": "john_agent"
+          }
+        }
+      },
+      "CreateAgentRequest": {
+        "type": "object",
+        "required": [
+          "username",
+          "name",
+          "password",
+          "email",
+          "mobileNumber",
+          "role",
+          "phoneNumberIds"
+        ],
+        "properties": {
+          "username": {
+            "type": "string",
+            "example": "alex_agent"
+          },
+          "name": {
+            "type": "string",
+            "example": "Alex Agent"
+          },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "example": "Test@1234"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "alex.agent@example.com"
+          },
+          "mobileNumber": {
+            "type": "string",
+            "example": "9876543210"
+          },
+          "role": {
+            "type": "string",
+            "example": "AGENT"
+          },
+          "phoneNumberIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "123456789012345"
+            ]
+          },
+          "active": {
+            "type": "boolean",
+            "description": "Accepted by the current request model, but the backend decides the final active state.",
+            "example": true
+          }
+        }
+      },
+      "CreateAgentResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "000000000000000000000008"
+          },
+          "customerId": {
+            "type": "string",
+            "example": "000000000000000000000009"
+          },
+          "phoneNumberIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "123456789012345"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "example": "Alex Agent"
+          },
+          "username": {
+            "type": "string",
+            "example": "alex_agent"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "alex.agent@example.com"
+          },
+          "mobileNumber": {
+            "type": "string",
+            "example": "9876543210"
+          },
+          "role": {
+            "type": "string",
+            "example": "AGENT"
+          },
+          "active": {
+            "type": "boolean",
+            "example": true
+          },
+          "twoFactor": {
+            "$ref": "#/components/schemas/BasicUserTwoFactor"
+          },
+          "creationTime": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Epoch milliseconds.",
+            "example": 1755600000000
+          },
+          "lastUpdateTime": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Epoch milliseconds.",
+            "example": 1755600000000
+          }
+        },
+        "description": "The created agent. The password is cleared before the response is sent."
+      },
+      "TeamDropdownItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "00000000000000000000000a"
+          },
+          "name": {
+            "type": "string",
+            "example": "Sales Team"
+          }
+        }
+      },
+      "TeamResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "00000000000000000000000a"
+          },
+          "customerId": {
+            "type": "string",
+            "example": "000000000000000000000009"
+          },
+          "name": {
+            "type": "string",
+            "example": "Sales Team"
+          },
+          "defaultTeam": {
+            "type": "boolean",
+            "example": false
+          },
+          "memberUsernames": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "john_agent",
+              "priya_support"
+            ]
+          },
+          "createdBy": {
+            "type": "string",
+            "example": "admin_user"
+          },
+          "creationTime": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Epoch milliseconds.",
+            "example": 1755600000000
+          },
+          "lastModifiedBy": {
+            "type": "string",
+            "example": "admin_user"
+          },
+          "lastUpdateTime": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Epoch milliseconds.",
+            "example": 1755600000000
+          }
+        }
+      },
+      "ChatAssignmentRequest": {
+        "type": "object",
+        "required": [
+          "receiverNumber",
+          "target"
+        ],
+        "properties": {
+          "receiverNumber": {
+            "type": "string",
+            "description": "Contact receiver number whose chat should be assigned",
+            "example": "919876543210"
+          },
+          "target": {
+            "type": "string",
+            "description": "Assignment target type",
+            "enum": [
+              "TEAM",
+              "USER",
+              "ROUND_ROBIN"
+            ],
+            "example": "USER"
+          },
+          "teamId": {
+            "type": "string",
+            "description": "Required when target is TEAM. Optional for USER with assignTeam=true or ROUND_ROBIN to use a specific team.",
+            "example": "00000000000000000000000a"
+          },
+          "username": {
+            "type": "string",
+            "description": "Required when target is USER",
+            "example": "john_agent"
+          },
+          "assignTeam": {
+            "type": "boolean",
+            "description": "When target is USER, also assign the related team if true",
+            "example": true
+          },
+          "source": {
+            "type": "string",
+            "description": "Optional assignment source",
+            "enum": [
+              "CHATBOT_NOT_FOUND"
+            ],
+            "example": "CHATBOT_NOT_FOUND"
+          }
+        }
+      },
+      "BasicUserTwoFactor": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "example": false
+          }
+        }
+      },
+      "PaginatedReportResponse": {
+        "type": "object",
+        "description": "Paginated sent-message report. `results` is omitted when nothing matched.",
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MessageReport"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Total records matching the query across all pages.",
+            "example": 150
+          },
+          "metadata": {
+            "type": "object",
+            "properties": {
+              "totalRecords": {
+                "type": "integer",
+                "format": "int64",
+                "example": 150
+              }
+            }
+          }
+        }
+      },
+      "MessageReport": {
+        "type": "object",
+        "description": "One sent-message report row. Null fields are omitted.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Id of the stored message record.",
+            "example": "000000000000000000000001"
+          },
+          "to": {
+            "type": "string",
+            "example": "919876543210"
+          },
+          "userMessageId": {
+            "type": "string",
+            "description": "Caller-supplied correlation id, present only if one was sent.",
+            "example": "msg_12345"
+          },
+          "message": {
+            "type": "object",
+            "description": "The outbound message payload as sent to Meta.",
+            "additionalProperties": true
+          },
+          "creationTime": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Epoch milliseconds.",
+            "example": 1755600000000
+          },
+          "waId": {
+            "type": "string",
+            "description": "WhatsApp id assigned by Meta.",
+            "example": "wamid.HBgMOTE5ODc2NTQzMjEwFQIAERgSQkY2RjE4Q0Q0NTY3ODkwMTIA"
+          },
+          "lastStatus": {
+            "type": "string",
+            "example": "delivered"
+          },
+          "statuses": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "example": "delivered"
+                },
+                "timestamp": {
+                  "type": "string",
+                  "description": "Meta status timestamp, epoch seconds as a string.",
+                  "example": "1755600000"
+                }
+              }
+            }
+          },
+          "statusTime": {
+            "type": "object",
+            "description": "Epoch-second timestamps (as strings) per status; only the statuses reached are present.",
+            "properties": {
+              "accepted": {
+                "type": "string"
+              },
+              "sent": {
+                "type": "string"
+              },
+              "delivered": {
+                "type": "string"
+              },
+              "read": {
+                "type": "string"
+              },
+              "failed": {
+                "type": "string"
+              },
+              "deleted": {
+                "type": "string"
+              },
+              "captured": {
+                "type": "string"
+              },
+              "pending": {
+                "type": "string"
+              }
+            }
+          },
+          "error": {
+            "$ref": "#/components/schemas/MetaError"
+          },
+          "buttonReplies": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "retry": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PaymentConfiguration": {
+        "type": "object",
+        "description": "Active payment configuration profile returned by /api/v1/whatsapp/metaPayment/configs/active",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "00000000000000000000000c"
+          },
+          "whatsappBusinessAccountId": {
+            "type": "string",
+            "example": "987654321098765"
+          },
+          "configuration_name": {
+            "type": "string",
+            "example": "test-rz"
+          },
+          "merchant_category_code": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            }
+          },
+          "purpose_code": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            }
+          },
+          "status": {
+            "type": "string",
+            "example": "Active"
+          },
+          "provider_mid": {
+            "type": "string",
+            "example": "acc_testMerchant123"
+          },
+          "provider_name": {
+            "type": "string",
+            "example": "Razorpay"
+          },
+          "created_timestamp": {
+            "type": "integer",
+            "example": 1737716713
+          },
+          "updated_timestamp": {
+            "type": "integer",
+            "example": 1737716837
+          },
+          "creationTime": {
+            "type": "integer",
+            "example": 1700000000000
+          },
+          "lastUpdateTime": {
+            "type": "integer",
+            "example": 1700086400000
+          }
+        }
+      },
+      "ContactListRequest": {
+        "type": "object",
+        "properties": {
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "current": {
+                "type": "integer",
+                "example": 1
+              },
+              "pageSize": {
+                "type": "integer",
+                "example": 10
+              }
+            }
+          },
+          "order": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "fieldName": {
+                  "type": "string",
+                  "example": "creationTime"
+                },
+                "dir": {
+                  "type": "string",
+                  "enum": [
+                    "asc",
+                    "desc"
+                  ],
+                  "example": "desc"
+                }
+              }
+            }
+          },
+          "search": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "fieldName": {
+                  "type": "string",
+                  "example": "creationTime"
+                },
+                "value": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "example": [
+                    "1700000000000",
+                    "1700086400000"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "ContactListResponse": {
+        "type": "object",
+        "description": "Paginated contact list. `results` is omitted when nothing matched.",
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContactRecord"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Total records matching the query across all pages.",
+            "example": 150
+          },
+          "metadata": {
+            "type": "object",
+            "properties": {
+              "totalRecords": {
+                "type": "integer",
+                "format": "int64",
+                "example": 150
+              }
+            }
+          }
+        }
+      },
+      "SaveContactRequest": {
+        "type": "object",
+        "required": [
+          "receiverNumber"
+        ],
+        "properties": {
+          "receiverNumber": {
+            "type": "string",
+            "description": "Recipient phone number in international format",
+            "example": "919876543210"
+          },
+          "attributes": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Custom attributes for the contact",
+            "example": {
+              "abcdef1234567890abcdef01": "Jaipur",
+              "name": "John Doe",
+              "email": "john@example.com"
+            }
+          },
+          "labels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of label IDs to assign to the contact",
+            "example": [
+              "abcdef1234567890abcdef02"
+            ]
+          }
+        }
+      },
+      "ContactCsvImportRequest": {
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "properties": {
+          "file": {
+            "type": "string",
+            "format": "binary",
+            "description": "CSV file to import contacts. Required column: receiverNumber. Additional columns matching existing contact attribute names are imported as attributes."
+          }
+        }
+      },
+      "SuccessResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "example": "Operation completed successfully"
+          }
+        },
+        "description": "Generic acknowledgement. `message` is endpoint-specific - see each operation's example for the exact wording it returns."
+      },
+      "ProblemDetail": {
+        "type": "object",
+        "description": "Error body, sent as application/problem+json. `timestamp` is present only on some errors.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "about:blank"
+          },
+          "title": {
+            "type": "string",
+            "example": "Bad Request"
+          },
+          "status": {
+            "type": "integer",
+            "example": 400
+          },
+          "detail": {
+            "type": "string",
+            "example": "Failed to read request"
+          },
+          "instance": {
+            "type": "string",
+            "description": "Request path.",
+            "example": "/api/v1/messageTemplate/getTemplates"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Epoch milliseconds. Present only on errors built through ProblemDetailUtil.",
+            "example": 1787201037764
+          }
+        },
+        "additionalProperties": true
+      },
+      "MessageTemplate": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "000000000000000000000007"
+          },
+          "template": {
+            "type": "object",
+            "description": "The stored Meta template definition (name, language, category, status, components).",
+            "additionalProperties": true
+          },
+          "creationTime": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Epoch milliseconds.",
+            "example": 1755600000000
+          },
+          "lastUpdateTime": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Epoch milliseconds.",
+            "example": 1755600000000
+          }
+        }
+      },
+      "ContactRecord": {
+        "type": "object",
+        "description": "A stored contact. Distinct from `Contact`, which is the Meta contact-message payload.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "000000000000000000000003"
+          },
+          "receiverNumber": {
+            "type": "string",
+            "example": "919876543210"
+          },
+          "phoneNumberId": {
+            "type": "string",
+            "example": "123456789012345"
+          },
+          "whatsappName": {
+            "type": "string",
+            "example": "Asha Menon"
+          },
+          "attributes": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Custom contact attributes."
+          },
+          "labels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "ctwa_clid": {
+            "type": "string",
+            "description": "Click-to-WhatsApp ad click id."
+          },
+          "call_permission_reply": {
+            "type": "object",
+            "properties": {
+              "response": {
+                "type": "string"
+              },
+              "is_permanent": {
+                "type": "boolean"
+              },
+              "expiration_timestamp": {
+                "type": "integer",
+                "format": "int64"
+              },
+              "response_source": {
+                "type": "string"
+              }
+            }
+          },
+          "creationTime": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Epoch milliseconds.",
+            "example": 1755600000000
+          },
+          "lastUpdateTime": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Epoch milliseconds.",
+            "example": 1755600000000
+          }
+        }
+      },
+      "BulkOperationResponse": {
+        "type": "object",
+        "description": "SYNC returns affectedCount and durationMs; ASYNC returns operationId instead.",
+        "properties": {
+          "mode": {
+            "type": "string",
+            "enum": [
+              "SYNC",
+              "ASYNC"
+            ],
+            "example": "SYNC"
+          },
+          "affectedCount": {
+            "type": "integer",
+            "format": "int64",
+            "description": "SYNC only.",
+            "example": 42
+          },
+          "durationMs": {
+            "type": "integer",
+            "format": "int64",
+            "description": "SYNC only.",
+            "example": 128
+          },
+          "operationId": {
+            "type": "string",
+            "description": "ASYNC only.",
+            "example": "00000000000000000000000b"
+          }
+        }
+      },
+      "Campaign": {
+        "type": "object",
+        "description": "The created campaign (CampaignDto).",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "000000000000000000000002"
+          },
+          "name": {
+            "type": "string",
+            "example": "Diwali offer"
+          },
+          "campaignType": {
+            "type": "string",
+            "example": "TEMPLATE"
+          },
+          "phoneNumberId": {
+            "type": "string",
+            "example": "123456789012345"
+          },
+          "message": {
+            "type": "object",
+            "description": "The message payload sent to each recipient.",
+            "additionalProperties": true
+          },
+          "contactFilterId": {
+            "type": "string"
+          },
+          "reportFilter": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "preComposedMessageId": {
+            "type": "string"
+          },
+          "fileUploadId": {
+            "type": "string"
+          },
+          "schedule": {
+            "$ref": "#/components/schemas/CampaignSchedule"
+          },
+          "creationTime": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Epoch milliseconds.",
+            "example": 1755600000000
+          },
+          "lastUpdateTime": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Epoch milliseconds.",
+            "example": 1755600000000
+          }
+        }
+      },
+      "MetaSendMessageProblem": {
+        "type": "object",
+        "description": "Returned when Meta rejects a send. `error` carries Meta's own error object, with its snake_case keys unchanged.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "about:blank"
+          },
+          "title": {
+            "type": "string",
+            "example": "Meta send message error"
+          },
+          "status": {
+            "type": "integer",
+            "description": "Meta's own HTTP status, passed through.",
+            "example": 400
+          },
+          "detail": {
+            "type": "string",
+            "description": "Meta's error message.",
+            "example": "(#131009) Parameter value is not valid"
+          },
+          "instance": {
+            "type": "string",
+            "description": "Request path. Omitted when not set."
+          },
+          "error": {
+            "type": "object",
+            "description": "Meta's error object, verbatim - snake_case keys are preserved.",
+            "properties": {
+              "message": {
+                "type": "string",
+                "example": "(#131009) Parameter value is not valid"
+              },
+              "type": {
+                "type": "string",
+                "example": "OAuthException"
+              },
+              "code": {
+                "type": "integer",
+                "example": 131009
+              },
+              "fbtrace_id": {
+                "type": "string",
+                "example": "AtC_pycjj1gte5yjFCwt07y"
+              },
+              "error_data": {
+                "type": "object",
+                "properties": {
+                  "messaging_product": {
+                    "type": "string",
+                    "example": "whatsapp"
+                  },
+                  "details": {
+                    "type": "string",
+                    "example": "The phone number is malformed: Please use the format: +1234567890."
+                  }
+                }
+              }
+            },
+            "additionalProperties": true
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Added by ProblemDetailUtil on every error. Epoch milliseconds.",
+            "example": 1755600000000
+          }
+        },
+        "additionalProperties": true
+      },
+      "UnauthorizedProblem": {
+        "type": "object",
+        "description": "401 body. Unlike other errors, custom properties stay nested under `properties`, and `type` is null.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "nullable": true,
+            "description": "Literal null on this path - the custom serializer that would default it to \"about:blank\" is not registered on this mapper.",
+            "example": null
+          },
+          "title": {
+            "type": "string",
+            "example": "Unauthorized"
+          },
+          "status": {
+            "type": "integer",
+            "example": 401
+          },
+          "detail": {
+            "type": "string",
+            "description": "The authentication exception message.",
+            "example": "An Authentication object was not found in the SecurityContext"
+          },
+          "instance": {
+            "type": "string",
+            "description": "Request path, always set on this path.",
+            "example": "/api/v1/whatsapp/sendMessage"
+          },
+          "properties": {
+            "type": "object",
+            "description": "Custom properties, nested on this path only.",
+            "properties": {
+              "timestamp": {
+                "type": "integer",
+                "format": "int64",
+                "example": 1755600000000
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

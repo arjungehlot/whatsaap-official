@@ -1,0 +1,405 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "WACRM Send Messages API",
+    "version": "1.0.0",
+    "description": "Live API-key message sending service. Use Swagger's Authorize button with a WACRM API key, then use Try it out and Execute to make real requests. A successful send means Meta accepted the request; delivery confirmation arrives through the configured Meta status webhook."
+  },
+  "servers": [
+    {
+      "url": "/api/v1",
+      "description": "Current Node API"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Messages",
+      "description": "Send an individual WhatsApp message or an idempotent bulk job."
+    },
+    {
+      "name": "Templates",
+      "description": "Send an approved Meta WhatsApp template."
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerApiKey": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "WACRM API key",
+        "description": "Use the API key once returned from Settings → API keys. Example: Authorization: Bearer wacrm_..."
+      },
+      "headerApiKey": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key",
+        "description": "Alternative to the Authorization header. Do not send both headers."
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "required": ["error"],
+        "properties": {
+          "error": {
+            "type": "string",
+            "example": "file_url must be a public HTTPS URL"
+          },
+          "code": {
+            "type": "string",
+            "example": "INVALID_REQUEST"
+          }
+        }
+      },
+      "Recipient": {
+        "type": "object",
+        "required": ["to"],
+        "properties": {
+          "to": {
+            "type": "string",
+            "description": "Recipient WhatsApp number in E.164 digits. The leading plus is accepted and normalized.",
+            "pattern": "^\\+?[1-9][0-9]{6,14}$",
+            "example": "+919876543210"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 160,
+            "description": "Optional. Used when WACRM creates a new contact for this number.",
+            "example": "Asha Sharma"
+          },
+          "client_reference": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Optional caller-generated id echoed in a future response and webhook. It must be unique per request.",
+            "example": "order-1042-reminder"
+          }
+        }
+      },
+      "TextMessageRequest": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Recipient" },
+          {
+            "type": "object",
+            "required": ["type", "text"],
+            "properties": {
+              "type": { "const": "text" },
+              "text": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4096,
+                "example": "Hello Asha, how can we help you today?"
+              }
+            }
+          }
+        ]
+      },
+      "MediaMessageRequest": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Recipient" },
+          {
+            "type": "object",
+            "required": ["type", "file_url"],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["image", "video", "audio", "document"],
+                "description": "Use document for PDF, Word, Excel, PowerPoint, text, ZIP, and other document files supported by Meta."
+              },
+              "file_url": {
+                "type": "string",
+                "format": "uri",
+                "description": "A direct HTTPS URL that Meta can download without login, cookies, a firewall, or an expiring browser session.",
+                "example": "https://files.example.com/invoices/INV-1042.pdf"
+              },
+              "caption": {
+                "type": "string",
+                "maxLength": 1024,
+            "description": "Optional caption. Meta supports captions for image, video, and document messages. Audio captions are rejected.",
+                "example": "Your invoice for order #1042."
+              },
+              "filename": {
+                "type": "string",
+                "maxLength": 255,
+                "description": "Optional download filename. Used for document messages.",
+                "example": "invoice-1042.pdf"
+              }
+            }
+          }
+        ]
+      },
+      "TemplateComponent": {
+        "type": "object",
+        "required": ["type"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["header", "body", "button"]
+          },
+          "parameters": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["type"],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": ["text", "image", "video", "document", "payload"]
+                },
+                "text": { "type": "string" },
+                "link": {
+                  "type": "string",
+                  "format": "uri",
+                  "description": "For image, video, or document header parameters."
+                },
+                "filename": { "type": "string" },
+                "payload": {
+                  "type": "string",
+                  "description": "For quick-reply button parameters. Button components currently accept payload parameters only."
+                }
+              }
+            }
+          },
+          "index": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Required for button components; it is the zero-based Meta template button index."
+          }
+        }
+      },
+      "TemplateMessageRequest": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Recipient" },
+          {
+            "type": "object",
+            "required": ["type", "template"],
+            "properties": {
+              "type": { "const": "template" },
+              "template": {
+                "type": "object",
+                "required": ["name"],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Exact name of an approved template in this WACRM account.",
+                    "example": "order_update"
+                  },
+                  "language": {
+                    "type": "string",
+                    "default": "en_US",
+                    "example": "en_US"
+                  },
+                  "components": {
+                    "type": "array",
+                    "items": { "$ref": "#/components/schemas/TemplateComponent" },
+                    "description": "Variable values in the exact component order required by the approved Meta template."
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "SendMessageRequest": {
+        "oneOf": [
+          { "$ref": "#/components/schemas/TextMessageRequest" },
+          { "$ref": "#/components/schemas/MediaMessageRequest" },
+          { "$ref": "#/components/schemas/TemplateMessageRequest" }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "text": "#/components/schemas/TextMessageRequest",
+            "image": "#/components/schemas/MediaMessageRequest",
+            "video": "#/components/schemas/MediaMessageRequest",
+            "audio": "#/components/schemas/MediaMessageRequest",
+            "document": "#/components/schemas/MediaMessageRequest",
+            "template": "#/components/schemas/TemplateMessageRequest"
+          }
+        }
+      },
+      "SendMessageResponse": {
+        "type": "object",
+        "required": ["data"],
+        "properties": {
+          "data": {
+            "type": "object",
+            "required": ["message_id", "conversation_id", "contact_id", "status"],
+            "properties": {
+              "message_id": {
+                "type": "string",
+                "description": "WACRM message-log id.",
+                "example": "d42ebca4-c71c-4e77-a510-6b7f8c4951a3"
+              },
+              "whatsapp_message_id": {
+                "type": ["string", "null"],
+                "description": "Meta message id when Meta accepted the request. This does not prove recipient delivery."
+              },
+              "conversation_id": { "type": "string" },
+              "contact_id": { "type": "string" },
+              "contact_created": { "type": "boolean" },
+              "status": {
+                "type": "string",
+                "enum": ["accepted", "queued"],
+                "description": "accepted means Meta accepted the message. Check Message Logs or a future status endpoint for delivered/read/failed."
+              },
+              "client_reference": { "type": ["string", "null"] }
+            }
+          }
+        }
+      },
+      "BulkSendRequest": {
+        "type": "object",
+        "required": ["messages"],
+        "properties": {
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 120,
+            "description": "Required to make retries safe. Reusing this key with identical input returns the original job instead of sending duplicates.",
+            "example": "campaign-2026-09-24-batch-001"
+          },
+          "messages": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 100,
+            "items": { "$ref": "#/components/schemas/SendMessageRequest" }
+          }
+        }
+      },
+      "BulkSendResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "job_id": { "type": "string" },
+              "status": { "type": "string", "enum": ["queued", "processing", "completed", "completed_with_failures"] },
+              "total": { "type": "integer" },
+              "accepted": { "type": "integer" },
+              "failed": { "type": "integer" },
+              "status_url": { "type": "string", "description": "Relative URL for GET /messages/bulk/{job_id}." },
+              "items": {
+                "type": "array",
+                "description": "Included by the GET bulk job status response.",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "position": { "type": "integer" },
+                    "to": { "type": ["string", "null"] },
+                    "client_reference": { "type": ["string", "null"] },
+                    "status": { "type": "string", "enum": ["pending", "processing", "accepted", "failed"] },
+                    "result": { "type": ["object", "null"], "additionalProperties": true },
+                    "error": { "type": ["string", "null"] }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/messages": {
+      "post": {
+        "tags": ["Messages"],
+        "summary": "Send one WhatsApp message",
+        "description": "Send text, image, video, audio, document, or approved-template messages. Free-form text and media remain subject to WhatsApp's customer-service window; use an approved template outside that window.",
+        "security": [
+          { "bearerApiKey": [] },
+          { "headerApiKey": [] }
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": { "type": "string", "minLength": 8, "maxLength": 120 },
+            "description": "Reserved for future single-send idempotency. It is not required for this operation."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/SendMessageRequest" },
+              "examples": {
+                "text": {
+                  "summary": "Single text message",
+                  "value": { "to": "+919876543210", "name": "Asha Sharma", "type": "text", "text": "Hello Asha, your order is ready." }
+                },
+                "imageWithCaption": {
+                  "summary": "Image with caption",
+                  "value": { "to": "+919876543210", "type": "image", "file_url": "https://files.example.com/catalog/new-arrival.jpg", "caption": "Our latest arrival." }
+                },
+                "documentWithCaption": {
+                  "summary": "PDF document with caption",
+                  "value": { "to": "+919876543210", "type": "document", "file_url": "https://files.example.com/invoices/INV-1042.pdf", "filename": "invoice-1042.pdf", "caption": "Your invoice is attached." }
+                },
+                "template": {
+                  "summary": "Approved template with body parameters",
+                  "value": { "to": "+919876543210", "type": "template", "template": { "name": "order_update", "language": "en_US", "components": [{ "type": "body", "parameters": [{ "type": "text", "text": "Asha" }, { "type": "text", "text": "1042" }] }] } }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Meta accepted the message for processing.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SendMessageResponse" } } } },
+          "400": { "description": "Invalid payload, inaccessible file URL, invalid phone number, or unsupported message type.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "401": { "description": "Missing, revoked, expired, or invalid API key.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "403": { "description": "API key does not have the messages:send scope.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "409": { "description": "Duplicate idempotency key with a different request body.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "422": { "description": "Meta rejected the send, for example because the customer-service window is closed.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "502": { "description": "Meta API or remote media host could not be reached.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/messages/bulk": {
+      "post": {
+        "tags": ["Messages"],
+        "summary": "Queue up to 100 messages",
+        "description": "Validate and queue up to 100 individual messages in a durable, idempotent job. Reuse an idempotency key only to retry exactly the same batch. Poll the returned status URL for per-recipient acceptance or send failures.",
+        "security": [
+          { "bearerApiKey": [] },
+          { "headerApiKey": [] }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/BulkSendRequest" } } }
+        },
+        "responses": {
+          "202": { "description": "Bulk job accepted and queued.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/BulkSendResponse" } } } },
+          "400": { "description": "Invalid batch payload.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "401": { "description": "Invalid API key.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "403": { "description": "API key lacks messages:send scope.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "409": { "description": "Idempotency key was previously used for a different batch.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/messages/bulk/{job_id}": {
+      "get": {
+        "tags": ["Messages"],
+        "summary": "Get a bulk send job",
+        "description": "Read the current job totals and each recipient's accepted or failed result.",
+        "security": [
+          { "bearerApiKey": [] },
+          { "headerApiKey": [] }
+        ],
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Job status and per-recipient results.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/BulkSendResponse" } } } },
+          "401": { "description": "Invalid API key.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "404": { "description": "Bulk job not found.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    }
+  }
+}
