@@ -1,0 +1,27 @@
+{
+  "name": "waflow-backend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "check": "node --check src/server.js && node --check src/app.js && node --check src/models/MessageCreditUsage.js && node --check src/models/OutboundMessageBatch.js && node --check src/models/SenderReplacementAudit.js && node --check src/modules/admin/admin.controller.js && node --check src/modules/admin/admin.routes.js && node --check src/modules/admin/admin.schemas.js && node --check src/modules/admin/admin.service.js && node --check src/modules/billing/billing.controller.js && node --check src/modules/billing/billing.routes.js && node --check src/modules/billing/billing.schemas.js && node --check src/modules/billing/billing.service.js && node --check src/modules/billing/entitlements.service.js && node --check src/modules/billing/message-credits.service.js && node --check src/modules/webhook-test/webhook-test.routes.js && node --check src/modules/auth/auth.controller.js && node --check src/modules/auth/auth.routes.js && node --check src/modules/auth/auth.schemas.js && node --check src/modules/auth/auth.service.js && node --check src/modules/api-keys/api-keys.controller.js && node --check src/modules/api-keys/api-keys.routes.js && node --check src/modules/api-keys/api-keys.schemas.js && node --check src/modules/api-keys/api-keys.service.js && node --check src/modules/docs/docs.controller.js && node --check src/modules/docs/docs.routes.js && node --check src/modules/docs/openapi.service.js && node --check src/modules/messages/messages.controller.js && node --check src/modules/messages/messages.routes.js && node --check src/modules/messages/messages.schemas.js && node --check src/modules/messages/messages.service.js && node --check src/modules/messages/message-dispatch.service.js && node --check src/modules/messages/outbound-batches.service.js && node --check src/modules/public-api/public-api.controller.js && node --check src/modules/public-api/public-api.routes.js && node --check src/modules/public-api/public-api.service.js && node --check src/modules/public-api/public-api.message.schemas.js && node --check src/modules/public-api/public-api.upload.js && node --check src/modules/whatsapp/whatsapp.controller.js && node --check src/modules/whatsapp/whatsapp.routes.js && node --check src/modules/whatsapp/whatsapp.engine.js && node --check src/modules/whatsapp/whatsapp.auth-store.js && node --check src/modules/whatsapp/whatsapp.send-queue.js && node --check src/modules/whatsapp/sender-replacement.service.js && node --check src/modules/inbox/inbox.controller.js && node --check src/modules/inbox/inbox.routes.js && node --check src/modules/inbox/inbox.service.js && node --check src/modules/inbox/inbox.ingest.js && node --check src/modules/contacts/contacts.controller.js && node --check src/modules/contacts/contacts.routes.js && node --check src/modules/contacts/contacts.service.js && node --check src/modules/contacts/contacts.workbook.js && node --check src/modules/templates/templates.controller.js && node --check src/modules/templates/templates.routes.js && node --check src/modules/templates/templates.service.js && node --check src/modules/templates/templates.upload.js && node --check src/modules/templates/template-storage.service.js && node --check src/modules/campaigns/campaigns.controller.js && node --check src/modules/campaigns/campaigns.routes.js && node --check src/modules/campaigns/campaigns.schemas.js && node --check src/modules/campaigns/campaigns.service.js && node --check src/modules/message-jobs/message-jobs.controller.js && node --check src/modules/message-jobs/message-jobs.routes.js && node --check src/modules/message-jobs/message-jobs.schemas.js && node --check src/modules/message-jobs/message-jobs.service.js && node --check src/modules/automations/automations.controller.js && node --check src/modules/automations/automations.routes.js && node --check src/modules/automations/automations.schemas.js && node --check src/modules/automations/automations.service.js"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1118.0",
+    "@whiskeysockets/baileys": "^7.0.0-rc14",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^9.9.3",
+    "morgan": "^1.10.0",
+    "multer": "^2.0.2",
+    "pino": "^10.3.1",
+    "razorpay": "^2.9.8",
+    "xlsx": "^0.18.5",
+    "zod": "^3.24.2"
+  }
+}

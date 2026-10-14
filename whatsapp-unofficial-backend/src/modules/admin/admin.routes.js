@@ -1,0 +1,26 @@
+import { Router } from "express";
+import { requireSessionAuth, requireSuperAdmin } from "../../middleware/auth.js";
+import { validate } from "../../middleware/validate.js";
+import { assignPlanSchema, deleteUserSchema, featureCreateSchema, featureUpdateSchema, idSchema, pageSchema, planCreateSchema, planDuplicateSchema, planReorderSchema, planUpdateSchema, userExpirySchema, userListSchema, userStatusSchema } from "./admin.schemas.js";
+import { deleteFeature, deletePlan, deleteUser, duplicatePlan, getFeatures, getPayments, getPlans, getSubscriptions, getUserDetails, getUsers, patchFeature, patchPlan, patchUserExpiry, patchUserPlan, patchUserStatus, postFeature, postPlan, reorderPlans } from "./admin.controller.js";
+
+export const adminRouter = Router();
+adminRouter.use(requireSessionAuth, requireSuperAdmin);
+adminRouter.get("/users", validate(userListSchema), getUsers);
+adminRouter.get("/users/:id", validate(idSchema), getUserDetails);
+adminRouter.patch("/users/:id/status", validate(userStatusSchema), patchUserStatus);
+adminRouter.patch("/users/:id/plan", validate(assignPlanSchema), patchUserPlan);
+adminRouter.patch("/users/:id/expiry", validate(userExpirySchema), patchUserExpiry);
+adminRouter.delete("/users/:id", validate(deleteUserSchema), deleteUser);
+adminRouter.get("/features", getFeatures);
+adminRouter.post("/features", validate(featureCreateSchema), postFeature);
+adminRouter.patch("/features/:id", validate(featureUpdateSchema), patchFeature);
+adminRouter.delete("/features/:id", validate(idSchema), deleteFeature);
+adminRouter.get("/plans", getPlans);
+adminRouter.post("/plans", validate(planCreateSchema), postPlan);
+adminRouter.post("/plans/reorder", validate(planReorderSchema), reorderPlans);
+adminRouter.patch("/plans/:id", validate(planUpdateSchema), patchPlan);
+adminRouter.post("/plans/:id/duplicate", validate(planDuplicateSchema), duplicatePlan);
+adminRouter.delete("/plans/:id", validate(idSchema), deletePlan);
+adminRouter.get("/subscriptions", validate(pageSchema), getSubscriptions);
+adminRouter.get("/payments", validate(pageSchema), getPayments);

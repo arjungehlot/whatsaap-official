@@ -1,0 +1,16 @@
+import { Router } from "express";
+import { requireAuth, requireSessionAuth } from "../../middleware/auth.js";
+import { validate } from "../../middleware/validate.js";
+import { checkout, checkoutPreview, getEntitlements, getMe, getMessageCredits, getPlans, payuCallback, razorpayVerify, razorpayWebhook } from "./billing.controller.js";
+import { checkoutPreviewSchema, checkoutSchema, razorpayVerifySchema } from "./billing.schemas.js";
+export const billingRouter = Router();
+billingRouter.get("/plans", getPlans);
+billingRouter.get("/me", requireAuth, getMe);
+billingRouter.get("/entitlements", requireAuth, getEntitlements);
+billingRouter.get("/credits", requireAuth, getMessageCredits);
+billingRouter.post("/checkout/preview", requireSessionAuth, validate(checkoutPreviewSchema), checkoutPreview);
+billingRouter.post("/checkout", requireSessionAuth, validate(checkoutSchema), checkout);
+billingRouter.post("/razorpay/verify", requireSessionAuth, validate(razorpayVerifySchema), razorpayVerify);
+billingRouter.post("/razorpay/webhook", razorpayWebhook);
+billingRouter.get("/payu/callback", (_req, res) => res.status(405).json({ success: false, message: "PayU callback accepts POST requests from PayU only" }));
+billingRouter.post("/payu/callback", payuCallback);

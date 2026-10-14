@@ -107,13 +107,20 @@ function makeAssignments(
 ): FeatureAssignment[] {
   return features
     .filter((feature) => selectedIds.includes(feature.id))
-    .map((feature) => ({
-      featureId: feature.id,
-      valueType: feature.valueType,
-      booleanValue: feature.valueType === "boolean" ? values[feature.id] !== "false" : undefined,
-      numberValue: feature.valueType === "number" ? Number(values[feature.id] || 0) : undefined,
-      textValue: feature.valueType === "text" ? values[feature.id] || "" : undefined,
-    }));
+    .map((feature) => {
+      const assignment: FeatureAssignment = {
+        featureId: feature.id,
+        valueType: feature.valueType,
+      };
+      if (feature.valueType === "boolean") {
+        assignment.booleanValue = values[feature.id] !== "false";
+      } else if (feature.valueType === "number") {
+        assignment.numberValue = Number(values[feature.id] || 0);
+      } else if (feature.valueType === "text") {
+        assignment.textValue = values[feature.id] || "";
+      }
+      return assignment;
+    });
 }
 
 function CapabilityChecklist({
@@ -269,7 +276,7 @@ function PlanEditorFields({
   onValue,
 }: {
   mode: "create" | "edit";
-  planCode?: string;
+  planCode?: string | undefined;
   draft: PlanDraft | CreatePlanDraft;
   onChange: (draft: PlanDraft | CreatePlanDraft) => void;
   features: AdminFeature[];
@@ -692,18 +699,21 @@ function AdminPage() {
   async function createPlan() {
     setSavingPlan(true);
     try {
-      await adminService.createPlan({
+      const payload: Parameters<typeof adminService.createPlan>[0] = {
         name: createDraft.name,
         slug: createDraft.slug,
         monthlyPrice: createDraft.isTrial ? 0 : Number(createDraft.monthlyPrice),
         yearlyPrice: createDraft.isTrial ? 0 : Number(createDraft.yearlyPrice),
         isTrial: createDraft.isTrial,
-        trialDays: createDraft.isTrial ? Number(createDraft.trialDays) : undefined,
         messageCreditsUnlimited: createDraft.messageCreditsUnlimited,
         monthlyMessageCredits: Number(createDraft.monthlyMessageCredits || 0),
         dailyMessageCredits: Number(createDraft.dailyMessageCredits || 0),
         features: makeAssignments(features, createFeatureIds, createValues),
-      });
+      };
+      if (createDraft.isTrial && createDraft.trialDays) {
+        payload.trialDays = Number(createDraft.trialDays);
+      }
+      await adminService.createPlan(payload);
       setCreatePlanOpen(false);
       setCreateDraft(emptyCreateDraft());
       await load();
@@ -717,17 +727,20 @@ function AdminPage() {
   async function savePlan(planId: string) {
     setSavingPlan(true);
     try {
-      await adminService.updatePlan(planId, {
+      const payload: Record<string, unknown> = {
         name: editDraft.name,
         monthlyPrice: editDraft.isTrial ? 0 : Number(editDraft.monthlyPrice),
         yearlyPrice: editDraft.isTrial ? 0 : Number(editDraft.yearlyPrice),
         isTrial: editDraft.isTrial,
-        trialDays: editDraft.isTrial ? Number(editDraft.trialDays) : undefined,
         messageCreditsUnlimited: editDraft.messageCreditsUnlimited,
         monthlyMessageCredits: Number(editDraft.monthlyMessageCredits || 0),
         dailyMessageCredits: Number(editDraft.dailyMessageCredits || 0),
         features: makeAssignments(features, editFeatureIds, editValues),
-      });
+      };
+      if (editDraft.isTrial && editDraft.trialDays) {
+        payload.trialDays = Number(editDraft.trialDays);
+      }
+      await adminService.updatePlan(planId, payload);
       setEditingPlan(null);
       await load();
       toast.success("Plan updated");
@@ -753,7 +766,11 @@ function AdminPage() {
     if (direction === "up" && plans[nextIndex]?.isTrial) return;
 
     const nextPlans = [...plans];
-    [nextPlans[index], nextPlans[nextIndex]] = [nextPlans[nextIndex], nextPlans[index]];
+    const current = nextPlans[index];
+    const target = nextPlans[nextIndex];
+    if (!current || !target) return;
+    nextPlans[index] = target;
+    nextPlans[nextIndex] = current;
     setPlans(nextPlans);
     setReorderingPlanId(plan.id);
     try {
