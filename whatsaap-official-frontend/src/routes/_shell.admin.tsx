@@ -1301,7 +1301,7 @@ function AdminPage() {
       {tab === "payments" && (
         <SectionCard
           title="Payments"
-          description="PayU and manual payment history, including pending and failed attempts."
+          description="Razorpay and manual payment history, including pending and failed attempts."
         >
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1100px] text-sm">

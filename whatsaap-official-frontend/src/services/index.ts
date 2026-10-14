@@ -976,11 +976,37 @@ export const billingService = {
       paymentId: string;
       completed: boolean;
       quote: { amountDue: number };
+      gateway?: "razorpay" | "payu" | "manual";
+      keyId?: string;
+      orderId?: string;
+      amount?: number;
+      currency?: string;
+      name?: string;
+      description?: string;
+      prefill?: {
+        name?: string;
+        email?: string;
+        contact?: string;
+      };
+      theme?: {
+        color?: string;
+      };
       action?: string;
       fields?: Record<string, string>;
     }>("/billing/checkout", {
       method: "POST",
       body: JSON.stringify({ planId, billingCycle, phone }),
+    });
+  },
+  async verifyRazorpayPayment(payload: {
+    paymentId?: string;
+    razorpay_order_id: string;
+    razorpay_payment_id: string;
+    razorpay_signature: string;
+  }) {
+    return apiRequest<{ payment: unknown }>("/billing/razorpay/verify", {
+      method: "POST",
+      body: JSON.stringify(payload),
     });
   },
   async current() {

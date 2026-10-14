@@ -96,9 +96,10 @@ function PricingPage() {
       .summary()
       .then((data) => {
         setPlans(data.plans as AdminPlan[]);
-        setSubscription(data.subscription);
-        if (data.subscription?.status === "active" && data.subscription.billingCycle) {
-          setBillingCycle(data.subscription.billingCycle);
+        const sub = data.subscription as { status?: string; billingCycle?: "monthly" | "yearly"; planId?: { _id?: string; id?: string; slug?: string; name?: string }; expiryDate?: string; isTrial?: boolean } | null;
+        setSubscription(sub);
+        if (sub?.status === "active" && sub.billingCycle) {
+          setBillingCycle(sub.billingCycle);
         }
       })
       .catch((reason) =>
@@ -182,6 +183,21 @@ function PricingPage() {
       setQuoteLoading(false);
     }
   }
+function loadRazorpayScript(): Promise<boolean> {
+  return new Promise((resolve) => {
+    if (typeof window !== "undefined" && (window as unknown as { Razorpay?: unknown }).Razorpay) {
+      resolve(true);
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+}
+
   async function buyPlan() {
     if (checkoutSubmittingRef.current) return;
     const plan = selectedPlan;
@@ -204,6 +220,68 @@ function PricingPage() {
         window.location.assign("/pricing?payment=success");
         return;
       }
+
+      if (checkout.gateway === "razorpay" || checkout.orderId) {
+        const loaded = await loadRazorpayScript();
+        if (!loaded) {
+          throw new Error("Unable to load Razorpay payment SDK. Please check your internet connection.");
+        }
+
+        const options = {
+          key: checkout.keyId,
+          amount: checkout.amount,
+          currency: checkout.currency || "INR",
+          name: checkout.name || "WAFlow",
+          description: checkout.description || `${plan.name} (${billingCycle})`,
+          order_id: checkout.orderId,
+          prefill: checkout.prefill || {
+            name: authService.currentUser()?.name || "Customer",
+            email: billingEmail,
+            contact: phone,
+          },
+          theme: checkout.theme || {
+            color: "#25D366",
+          },
+          handler: async (response: {
+            razorpay_order_id: string;
+            razorpay_payment_id: string;
+            razorpay_signature: string;
+          }) => {
+            try {
+              toast.loading("Verifying payment...", { id: "razorpay-verify" });
+              await billingService.verifyRazorpayPayment({
+                paymentId: checkout.paymentId,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+              });
+              toast.success("Payment successful! Your plan is activated.", { id: "razorpay-verify" });
+              window.location.assign("/pricing?payment=success");
+            } catch (err) {
+              toast.error(err instanceof Error ? err.message : "Payment verification failed", { id: "razorpay-verify" });
+              checkoutSubmittingRef.current = false;
+              setBuyingPlanId(null);
+            }
+          },
+          modal: {
+            ondismiss: () => {
+              checkoutSubmittingRef.current = false;
+              setBuyingPlanId(null);
+            },
+          },
+        };
+
+        const RazorpayCtor = (window as unknown as { Razorpay: new (opts: unknown) => { open: () => void; on: (evt: string, cb: unknown) => void } }).Razorpay;
+        const rzp = new RazorpayCtor(options);
+        rzp.on("payment.failed", (res: { error?: { description?: string } }) => {
+          toast.error(res?.error?.description || "Payment failed");
+          checkoutSubmittingRef.current = false;
+          setBuyingPlanId(null);
+        });
+        rzp.open();
+        return;
+      }
+
       if (!checkout.action || !checkout.fields) throw new Error("Unable to start secure checkout");
       const form = document.createElement("form");
       form.method = "POST";
