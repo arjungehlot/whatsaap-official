@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useWorkspaceSnapshot } from "@/hooks/use-workspace-snapshot";
 
 const protectedRoutes = [
-  { path: "/send-message", feature: "send-message", label: "Send message" },
+  { path: "/send-message", feature: "send-message", label: "Send message" }, 
   { path: "/campaigns", feature: "campaign-message", label: "Campaigns" },
   { path: "/templates", feature: "template", label: "Templates" },
   { path: "/automations", feature: "scheduler", label: "Schedulers" },
