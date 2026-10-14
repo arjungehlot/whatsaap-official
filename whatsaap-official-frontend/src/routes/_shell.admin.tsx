@@ -14,10 +14,13 @@ import {
   Plus,
   Power,
   RefreshCw,
+  Search,
   ShieldCheck,
   Trash2,
   UserRound,
+  X,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { PageHeader } from "@/components/common/PageHeader";
 import { SectionCard } from "@/components/common/SectionCard";
 import { Button } from "@/components/ui/button";
@@ -771,122 +774,200 @@ function AdminPage() {
   ] as const;
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Super Admin"
-        description="Manage users, plans, subscriptions, and payments."
-        actions={
-          <Button variant="outline" onClick={() => void load()}>
-            <RefreshCw className="mr-2 size-4" />
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/70 pb-3">
+        <div>
+          <div className="flex items-center gap-2">
+            <h1 className="text-lg font-bold tracking-tight text-foreground sm:text-xl">Super Admin</h1>
+            <Badge variant="outline" className="text-[10px] uppercase font-semibold tracking-wider text-emerald-600 dark:text-emerald-400 border-emerald-500/30 bg-emerald-500/10">
+              Admin Portal
+            </Badge>
+          </div>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            Manage users, subscription plans, active subscriptions, and payment transactions.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 text-xs px-2.5"
+            onClick={() => void load()}
+            disabled={loading}
+          >
+            <RefreshCw className={cn("mr-1.5 size-3.5", loading && "animate-spin")} />
             Refresh
           </Button>
-        }
-      />
-      <div className="grid gap-3 sm:grid-cols-4">
-        {tabs.map(([key, label, Icon]) => (
-          <Button
-            key={key}
-            variant={tab === key ? "default" : "outline"}
-            className="justify-start"
-            onClick={() => {
-              setHistoryPage(1);
-              setTab(key);
-            }}
-          >
-            <Icon className="mr-2 size-4" />
-            {label}
-          </Button>
-        ))}
+        </div>
       </div>
+
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="inline-flex items-center gap-1 rounded-lg border border-border/60 bg-muted/60 p-1">
+          {tabs.map(([key, label, Icon]) => {
+            const active = tab === key;
+            return (
+              <button
+                key={key}
+                type="button"
+                onClick={() => {
+                  setHistoryPage(1);
+                  setTab(key);
+                }}
+                className={cn(
+                  "inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-all cursor-pointer",
+                  active
+                    ? "bg-primary text-primary-foreground shadow-xs font-semibold"
+                    : "text-muted-foreground hover:bg-background/80 hover:text-foreground"
+                )}
+              >
+                <Icon className="size-3.5" />
+                {label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       {tab === "users" && (
         <SectionCard
-          title="All users"
+          title="All Users"
           description="Manage account access and assign a paid active plan manually. The assigned plan replaces the user's current subscription."
+          actions={
+            <span className="text-xs text-muted-foreground font-medium">
+              {users.length} {users.length === 1 ? "user" : "users"} registered
+            </span>
+          }
         >
-          <div className="mb-4 flex gap-2">
-            <Input
-              placeholder="Search name, email, phone"
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") void load();
-              }}
-            />
-            <Button onClick={() => void load()}>Search</Button>
+          <div className="mb-3 flex flex-wrap items-center gap-2">
+            <div className="relative flex-1 min-w-[220px] max-w-sm">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
+              <Input
+                className="h-8 pl-8 pr-7 text-xs"
+                placeholder="Search name, email, phone..."
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") void load();
+                }}
+              />
+              {search && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearch("");
+                    setTimeout(() => void load(), 0);
+                  }}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  title="Clear search"
+                >
+                  <X className="size-3.5" />
+                </button>
+              )}
+            </div>
+            <Button size="sm" className="h-8 px-3 text-xs" onClick={() => void load()}>
+              Search
+            </Button>
           </div>
+
           {loading ? (
-            <Loader2 className="size-5 animate-spin" />
+            <div className="flex justify-center p-8">
+              <Loader2 className="size-5 animate-spin text-muted-foreground" />
+            </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[1600px] text-sm">
+            <div className="overflow-x-auto rounded-md border border-border/70">
+              <table className="w-full text-xs">
                 <thead>
-                  <tr className="border-b text-left">
-                    <th className="p-2">User</th>
-                    <th className="p-2">Registered with</th>
-                    <th className="p-2">Role</th>
-                    <th className="p-2">Account created</th>
-                    <th className="p-2">Current plan</th>
-                    <th className="p-2">Plan purchased</th>
-                    <th className="p-2">Expires</th>
-                    <th className="p-2">Days left</th>
-                    <th className="p-2">Status</th>
-                    <th className="p-2">Manual plan</th>
-                    <th className="p-2">Billing cycle</th>
-                    <th className="p-2">Actions</th>
+                  <tr className="border-b border-border bg-muted/60 text-left font-semibold uppercase tracking-wider text-muted-foreground">
+                    <th className="whitespace-nowrap px-3 py-2.5">Name</th>
+                    <th className="whitespace-nowrap px-3 py-2.5">Email</th>
+                    <th className="whitespace-nowrap px-3 py-2.5">Role</th>
+                    <th className="whitespace-nowrap px-3 py-2.5">Sign-up Via</th>
+                    <th className="whitespace-nowrap px-3 py-2.5">Account Created</th>
+                    <th className="whitespace-nowrap px-3 py-2.5">Current Plan</th>
+                    <th className="whitespace-nowrap px-3 py-2.5">Plan Status</th>
+                    <th className="whitespace-nowrap px-3 py-2.5">Billing Cycle</th>
+                    <th className="whitespace-nowrap px-3 py-2.5">Plan Purchased</th>
+                    <th className="whitespace-nowrap px-3 py-2.5">Expires</th>
+                    <th className="whitespace-nowrap px-3 py-2.5">Days Left</th>
+                    <th className="whitespace-nowrap px-3 py-2.5">Account Status</th>
+                    <th className="whitespace-nowrap px-3 py-2.5">Manual Plan</th>
+                    <th className="whitespace-nowrap px-3 py-2.5">Assign Cycle</th>
+                    <th className="whitespace-nowrap px-3 py-2.5 text-center">Actions</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-border/60">
                   {users.map((user) => (
-                    <tr key={user.id} className="border-b">
-                      <td className="p-2">
-                        <div className="font-medium">{user.name}</div>
-                        <div className="text-muted-foreground">{user.email}</div>
+                    <tr key={user.id} className="hover:bg-muted/30 transition-colors">
+                      <td className="whitespace-nowrap px-3 py-2 font-medium text-foreground">
+                        {user.name}
                       </td>
-                      <td className="p-2">
-                        <Badge variant={user.authProvider === "google" ? "secondary" : "outline"}>
-                          {user.authProvider === "google" ? "Google" : "Email password"}
-                        </Badge>
+                      <td className="whitespace-nowrap px-3 py-2 font-mono text-[11px] text-muted-foreground">
+                        {user.email}
                       </td>
-                      <td className="p-2">
-                        <Badge variant={user.role === "super_admin" ? "default" : "outline"}>
+                      <td className="whitespace-nowrap px-3 py-2">
+                        <Badge
+                          variant={user.role === "super_admin" ? "default" : "outline"}
+                          className={cn(
+                            "text-[10px] uppercase font-semibold tracking-wider px-2 py-0.5",
+                            user.role === "super_admin" && "bg-primary text-primary-foreground",
+                            user.role === "owner" && "border-blue-500/40 text-blue-600 dark:text-blue-400 bg-blue-500/5"
+                          )}
+                        >
                           {user.role.replace(/_/g, " ")}
                         </Badge>
                       </td>
-                      <td className="p-2 text-muted-foreground">
+                      <td className="whitespace-nowrap px-3 py-2">
+                        <Badge variant="outline" className="text-[10px] font-normal px-2 py-0.5">
+                          {user.authProvider === "google" ? "Google" : "Email password"}
+                        </Badge>
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-2 text-muted-foreground">
                         {formatCalendarDate(user.registeredAt)}
                       </td>
-                      <td className="p-2">
-                        <div className="font-medium">{user.plan}</div>
-                        <div className="text-xs capitalize text-muted-foreground">
-                          {user.subscriptionStatus}
-                          {user.billingCycle ? ` · ${user.billingCycle}` : ""}
-                        </div>
+                      <td className="whitespace-nowrap px-3 py-2 font-medium">
+                        {user.plan}
                       </td>
-                      <td className="p-2 text-muted-foreground">
+                      <td className="whitespace-nowrap px-3 py-2">
+                        <span className={cn(
+                          "inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium capitalize",
+                          user.subscriptionStatus === "active"
+                            ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
+                            : "bg-muted text-muted-foreground"
+                        )}>
+                          {user.subscriptionStatus || "active"}
+                        </span>
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-2 capitalize text-muted-foreground">
+                        {user.billingCycle || "-"}
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-2 text-muted-foreground">
                         {formatCalendarDate(user.planStartDate)}
                       </td>
-                      <td className="p-2 text-muted-foreground">
+                      <td className="whitespace-nowrap px-3 py-2 text-muted-foreground">
                         {formatCalendarDate(user.planExpiryDate)}
                       </td>
-                      <td className="p-2">
+                      <td className="whitespace-nowrap px-3 py-2">
                         {user.planExpiryDate ? (
-                          <span className="font-medium text-primary">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-primary/10 text-primary border border-primary/20">
                             {daysUntil(user.planExpiryDate)}
                           </span>
                         ) : (
                           <span className="text-muted-foreground">-</span>
                         )}
                       </td>
-                      <td className="p-2">
-                        <Badge
-                          variant={user.accountStatus === "active" ? "default" : "destructive"}
-                        >
+                      <td className="whitespace-nowrap px-3 py-2">
+                        <span className={cn(
+                          "inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider",
+                          user.accountStatus === "active"
+                            ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
+                            : "bg-destructive/10 text-destructive border border-destructive/20"
+                        )}>
                           {user.accountStatus}
-                        </Badge>
+                        </span>
                       </td>
-                      <td className="p-2">
+                      <td className="whitespace-nowrap px-3 py-2">
                         <select
-                          className="h-9 min-w-44 rounded-md border border-input bg-background px-2 text-sm"
+                          className="h-8 w-36 rounded-md border border-input bg-background px-2 text-xs focus:ring-1 focus:ring-primary focus:outline-none"
                           value={selectedPlanIds[user.id] || ""}
                           onChange={(event) => {
                             setSelectedPlanIds({
@@ -907,10 +988,10 @@ function AdminPage() {
                           ))}
                         </select>
                       </td>
-                      <td className="p-2">
+                      <td className="whitespace-nowrap px-3 py-2">
                         <select
                           aria-label={`Billing cycle for ${user.name}`}
-                          className="h-9 min-w-36 rounded-md border border-input bg-background px-2 text-sm disabled:cursor-not-allowed disabled:opacity-60"
+                          className="h-8 w-24 rounded-md border border-input bg-background px-2 text-xs disabled:cursor-not-allowed disabled:opacity-50 focus:ring-1 focus:ring-primary focus:outline-none"
                           value={selectedPlanCycles[user.id] || "monthly"}
                           disabled={!selectedPlanIds[user.id]}
                           onChange={(event) =>
@@ -924,14 +1005,11 @@ function AdminPage() {
                           <option value="yearly">Yearly</option>
                         </select>
                       </td>
-                      <td className="p-2">
-                        <div className="flex gap-2">
-                          <Button size="sm" variant="outline" onClick={() => void toggleUser(user)}>
-                            <Power className="mr-1 size-3" />
-                            {user.accountStatus === "active" ? "Suspend" : "Activate"}
-                          </Button>
+                      <td className="whitespace-nowrap px-3 py-2">
+                        <div className="flex items-center justify-end gap-1.5">
                           <Button
                             size="sm"
+                            className="h-8 px-2.5 text-xs shadow-none"
                             disabled={!selectedPlanIds[user.id] || assigningUserId === user.id}
                             onClick={() => void assignPlan(user)}
                           >
@@ -942,24 +1020,35 @@ function AdminPage() {
                             )}
                           </Button>
                           <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-8 px-2 text-xs"
+                            onClick={() => void toggleUser(user)}
+                          >
+                            <Power className="mr-1 size-3" />
+                            {user.accountStatus === "active" ? "Suspend" : "Activate"}
+                          </Button>
+                          <Button
                             size="icon"
                             variant="outline"
+                            className="size-8"
                             title="Set subscription expiry"
                             aria-label={`Set subscription expiry for ${user.name}`}
                             disabled={!user.planExpiryDate}
                             onClick={() => openExpiryEditor(user)}
                           >
-                            <CalendarClock className="size-4" />
+                            <CalendarClock className="size-3.5" />
                           </Button>
                           <Button
                             size="icon"
                             variant="destructive"
+                            className="size-8"
                             title={user.role === "super_admin" ? "Super-admin accounts cannot be deleted" : "Delete user permanently"}
                             aria-label={`Delete ${user.name} permanently`}
                             disabled={user.role === "super_admin"}
                             onClick={() => openDeleteDialog(user)}
                           >
-                            <Trash2 className="size-4" />
+                            <Trash2 className="size-3.5" />
                           </Button>
                         </div>
                       </td>
@@ -1221,45 +1310,44 @@ function AdminPage() {
           title="Subscriptions"
           description="Every trial, manually assigned, and paid plan record."
         >
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[1040px] text-sm">
-              <thead className="bg-surface-muted text-left text-xs uppercase tracking-wide text-muted-foreground">
-                <tr>
-                  <th className="px-4 py-3 font-medium">User</th>
-                  <th className="px-4 py-3 font-medium">Plan</th>
-                  <th className="px-4 py-3 font-medium">Cycle</th>
-                  <th className="px-4 py-3 font-medium">Status</th>
-                  <th className="px-4 py-3 font-medium">Starts</th>
-                  <th className="px-4 py-3 font-medium">Ends</th>
-                  <th className="px-4 py-3 font-medium">Amount</th>
-                  <th className="px-4 py-3 font-medium">Created</th>
+          <div className="overflow-x-auto rounded-md border border-border/70">
+            <table className="w-full text-xs">
+              <thead>
+                <tr className="border-b border-border bg-muted/60 text-left font-semibold uppercase tracking-wider text-muted-foreground">
+                  <th className="whitespace-nowrap px-3 py-2.5">User Name</th>
+                  <th className="whitespace-nowrap px-3 py-2.5">Email</th>
+                  <th className="whitespace-nowrap px-3 py-2.5">Plan</th>
+                  <th className="whitespace-nowrap px-3 py-2.5">Billing Cycle</th>
+                  <th className="whitespace-nowrap px-3 py-2.5">Status</th>
+                  <th className="whitespace-nowrap px-3 py-2.5">Starts</th>
+                  <th className="whitespace-nowrap px-3 py-2.5">Ends</th>
+                  <th className="whitespace-nowrap px-3 py-2.5">Amount</th>
+                  <th className="whitespace-nowrap px-3 py-2.5">Created</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border">
+              <tbody className="divide-y divide-border/60">
                 {loading ? (
                   <tr>
-                    <td className="px-4 py-10 text-center text-muted-foreground" colSpan={8}>
+                    <td className="px-3 py-8 text-center text-muted-foreground" colSpan={9}>
                       <Loader2 className="mx-auto size-5 animate-spin" />
                     </td>
                   </tr>
                 ) : subscriptions.length ? (
                   subscriptions.map((subscription) => (
-                    <tr key={subscription._id}>
-                      <td className="px-4 py-3">
-                        <div className="font-medium">
-                          {subscription.userId?.name || "Deleted user"}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          {subscription.userId?.email || "-"}
-                        </div>
+                    <tr key={subscription._id} className="hover:bg-muted/30 transition-colors">
+                      <td className="whitespace-nowrap px-3 py-2 font-medium text-foreground">
+                        {subscription.userId?.name || "Deleted user"}
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="whitespace-nowrap px-3 py-2 font-mono text-[11px] text-muted-foreground">
+                        {subscription.userId?.email || "-"}
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-2">
                         <div className="font-medium">
                           {subscription.planId?.name ||
                             subscription.planNameSnapshot ||
                             "Deleted plan"}
                         </div>
-                        <div className="text-xs text-muted-foreground">
+                        <div className="text-[10px] text-muted-foreground">
                           {subscription.isTrial
                             ? "Free trial"
                             : subscription.autoRenew
@@ -1267,27 +1355,27 @@ function AdminPage() {
                               : "Manual renewal"}
                         </div>
                       </td>
-                      <td className="px-4 py-3 capitalize">{subscription.billingCycle}</td>
-                      <td className="px-4 py-3">
+                      <td className="whitespace-nowrap px-3 py-2 capitalize text-muted-foreground">{subscription.billingCycle}</td>
+                      <td className="whitespace-nowrap px-3 py-2">
                         <RecordStatus status={subscription.status} />
                       </td>
-                      <td className="px-4 py-3 text-muted-foreground">
+                      <td className="whitespace-nowrap px-3 py-2 text-muted-foreground">
                         {formatDate(subscription.startDate)}
                       </td>
-                      <td className="px-4 py-3 text-muted-foreground">
+                      <td className="whitespace-nowrap px-3 py-2 text-muted-foreground">
                         {formatDate(subscription.expiryDate)}
                       </td>
-                      <td className="px-4 py-3 font-medium">
+                      <td className="whitespace-nowrap px-3 py-2 font-medium">
                         {formatAmount(subscription.amountSnapshot, subscription.currencySnapshot)}
                       </td>
-                      <td className="px-4 py-3 text-muted-foreground">
+                      <td className="whitespace-nowrap px-3 py-2 text-muted-foreground">
                         {formatDate(subscription.createdAt)}
                       </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td className="px-4 py-10 text-center text-muted-foreground" colSpan={8}>
+                    <td className="px-3 py-8 text-center text-muted-foreground" colSpan={9}>
                       No subscriptions found.
                     </td>
                   </tr>
@@ -1303,69 +1391,70 @@ function AdminPage() {
           title="Payments"
           description="Razorpay and manual payment history, including pending and failed attempts."
         >
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[1100px] text-sm">
-              <thead className="bg-surface-muted text-left text-xs uppercase tracking-wide text-muted-foreground">
-                <tr>
-                  <th className="px-4 py-3 font-medium">User</th>
-                  <th className="px-4 py-3 font-medium">Plan</th>
-                  <th className="px-4 py-3 font-medium">Amount</th>
-                  <th className="px-4 py-3 font-medium">Cycle</th>
-                  <th className="px-4 py-3 font-medium">Status</th>
-                  <th className="px-4 py-3 font-medium">Gateway</th>
-                  <th className="px-4 py-3 font-medium">Transaction</th>
-                  <th className="px-4 py-3 font-medium">Completed</th>
-                  <th className="px-4 py-3 font-medium">Created</th>
+          <div className="overflow-x-auto rounded-md border border-border/70">
+            <table className="w-full text-xs">
+              <thead>
+                <tr className="border-b border-border bg-muted/60 text-left font-semibold uppercase tracking-wider text-muted-foreground">
+                  <th className="whitespace-nowrap px-3 py-2.5">User Name</th>
+                  <th className="whitespace-nowrap px-3 py-2.5">Email</th>
+                  <th className="whitespace-nowrap px-3 py-2.5">Plan</th>
+                  <th className="whitespace-nowrap px-3 py-2.5">Amount</th>
+                  <th className="whitespace-nowrap px-3 py-2.5">Billing Cycle</th>
+                  <th className="whitespace-nowrap px-3 py-2.5">Status</th>
+                  <th className="whitespace-nowrap px-3 py-2.5">Gateway</th>
+                  <th className="whitespace-nowrap px-3 py-2.5">Transaction ID</th>
+                  <th className="whitespace-nowrap px-3 py-2.5">Completed</th>
+                  <th className="whitespace-nowrap px-3 py-2.5">Created</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border">
+              <tbody className="divide-y divide-border/60">
                 {loading ? (
                   <tr>
-                    <td className="px-4 py-10 text-center text-muted-foreground" colSpan={9}>
+                    <td className="px-3 py-8 text-center text-muted-foreground" colSpan={10}>
                       <Loader2 className="mx-auto size-5 animate-spin" />
                     </td>
                   </tr>
                 ) : payments.length ? (
                   payments.map((payment) => (
-                    <tr key={payment._id}>
-                      <td className="px-4 py-3">
-                        <div className="font-medium">{payment.userId?.name || "Deleted user"}</div>
-                        <div className="text-xs text-muted-foreground">
-                          {payment.userId?.email || "-"}
-                        </div>
+                    <tr key={payment._id} className="hover:bg-muted/30 transition-colors">
+                      <td className="whitespace-nowrap px-3 py-2 font-medium text-foreground">
+                        {payment.userId?.name || "Deleted user"}
                       </td>
-                      <td className="px-4 py-3 font-medium">
+                      <td className="whitespace-nowrap px-3 py-2 font-mono text-[11px] text-muted-foreground">
+                        {payment.userId?.email || "-"}
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-2 font-medium">
                         {payment.planId?.name || "Deleted plan"}
                       </td>
-                      <td className="px-4 py-3 font-medium">
+                      <td className="whitespace-nowrap px-3 py-2 font-semibold">
                         {formatAmount(payment.amount, payment.currency)}
                       </td>
-                      <td className="px-4 py-3 capitalize">{payment.billingCycle}</td>
-                      <td className="px-4 py-3">
+                      <td className="whitespace-nowrap px-3 py-2 capitalize text-muted-foreground">{payment.billingCycle}</td>
+                      <td className="whitespace-nowrap px-3 py-2">
                         <RecordStatus status={payment.status} />
                         {payment.failureReason && (
-                          <div className="mt-1 max-w-44 text-xs text-destructive">
+                          <div className="mt-0.5 max-w-44 text-[11px] text-destructive">
                             {payment.failureReason}
                           </div>
                         )}
                       </td>
-                      <td className="px-4 py-3 capitalize">
+                      <td className="whitespace-nowrap px-3 py-2 capitalize text-muted-foreground">
                         {payment.paymentMethod || payment.gateway || "-"}
                       </td>
-                      <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
+                      <td className="whitespace-nowrap px-3 py-2 font-mono text-[11px] text-muted-foreground">
                         {payment.gatewayTransactionId || "-"}
                       </td>
-                      <td className="px-4 py-3 text-muted-foreground">
+                      <td className="whitespace-nowrap px-3 py-2 text-muted-foreground">
                         {formatDate(payment.completedAt)}
                       </td>
-                      <td className="px-4 py-3 text-muted-foreground">
+                      <td className="whitespace-nowrap px-3 py-2 text-muted-foreground">
                         {formatDate(payment.createdAt)}
                       </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td className="px-4 py-10 text-center text-muted-foreground" colSpan={9}>
+                    <td className="px-3 py-8 text-center text-muted-foreground" colSpan={10}>
                       No payments found.
                     </td>
                   </tr>
