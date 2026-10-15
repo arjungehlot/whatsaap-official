@@ -29,13 +29,13 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/pricing")({
   head: () => ({
     meta: [
-      { title: "Pricing — WAFlow WhatsApp Automation Plans" },
+      { title: "Pricing — Whatsaap Plans" },
       {
         name: "description",
         content:
-          "Compare WAFlow plans: free starter tier, Starter, Professional and Business. Contacts, messages, team seats and automation limits explained.",
+          "Compare Whatsaap plans: free starter tier, Starter, Professional and Business. Contacts, messages, team seats and automation limits explained.",
       },
-      { property: "og:title", content: "WAFlow Pricing" },
+      { property: "og:title", content: "Whatsaap Pricing" },
       {
         property: "og:description",
         content: "Simple monthly plans for WhatsApp campaigns, inbox and automations. Start free.",
@@ -231,7 +231,7 @@ function loadRazorpayScript(): Promise<boolean> {
           key: checkout.keyId,
           amount: checkout.amount,
           currency: checkout.currency || "INR",
-          name: checkout.name || "WAFlow",
+          name: checkout.name || "Whatsaap",
           description: checkout.description || `${plan.name} (${billingCycle})`,
           order_id: checkout.orderId,
           prefill: checkout.prefill || {
@@ -500,7 +500,7 @@ function loadRazorpayScript(): Promise<boolean> {
                 placeholder="No email found for this account"
               />
               <p className="text-xs text-muted-foreground">
-                This is the verified email on your WAFlow account.
+                This is the verified email on your Whatsaap account.
               </p>
             </div>
             <div className="grid gap-2">

@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { Loader2, MailCheck } from "lucide-react";
 import { AuthShell } from "@/components/auth/AuthShell";
+import { MarketingHeader } from "@/components/marketing/MarketingHeader";
+import { MarketingFooter } from "@/components/marketing/MarketingFooter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,12 +12,12 @@ import { authService } from "@/services";
 export const Route = createFileRoute("/forgot-password")({
   head: () => ({
     meta: [
-      { title: "Reset your WAFlow password" },
+      { title: "Reset your Whatsaap password" },
       {
         name: "description",
-        content: "Request a secure password reset link for your WAFlow workspace account.",
+        content: "Request a secure password reset link for your Whatsaap workspace account.",
       },
-      { property: "og:title", content: "Reset your WAFlow password" },
+      { property: "og:title", content: "Reset your Whatsaap password" },
       { property: "og:description", content: "Get back into your WhatsApp automation dashboard." },
     ],
   }),
@@ -36,57 +38,63 @@ function ForgotPasswordPage() {
   }
 
   return (
-    <AuthShell
-      title={sent ? "Check your inbox" : "Reset your password"}
-      subtitle={
-        sent
-          ? `We sent a password reset link to ${email}. The link expires in 30 minutes.`
-          : "Enter the email linked to your workspace and we'll send a reset link."
-      }
-      footer={
-        <p>
-          <Link to="/login" className="font-medium text-primary hover:underline">
-            Back to log in
-          </Link>
-        </p>
-      }
-    >
-      {sent ? (
-        <div className="card-surface flex items-start gap-3 p-5">
-          <MailCheck className="mt-0.5 size-5 shrink-0 text-primary" />
-          <div>
-            <p className="text-sm font-medium">Reset link sent</p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Didn&apos;t receive it? Check spam, or{" "}
-              <button
-                onClick={() => setSent(false)}
-                className="font-medium text-primary hover:underline"
-              >
-                try another email
-              </button>
-              .
+    <div className="min-h-screen flex flex-col bg-[#f8fafc]">
+      <MarketingHeader />
+      <main className="flex-1 flex items-center justify-center py-6 sm:py-10 px-2 sm:px-4">
+        <AuthShell
+          title={sent ? "Check your inbox" : "Reset your password"}
+          subtitle={
+            sent
+              ? `We sent a password reset link to ${email}. The link expires in 30 minutes.`
+              : "Enter the email linked to your workspace and we'll send a reset link."
+          }
+          footer={
+            <p>
+              <Link to="/login" className="font-medium text-primary hover:underline">
+                Back to log in
+              </Link>
             </p>
-          </div>
-        </div>
-      ) : (
-        <form onSubmit={onSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Work email</Label>
-            <Input
-              id="email"
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@company.com"
-            />
-          </div>
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading && <Loader2 className="size-4 animate-spin" />}
-            {loading ? "Sending link…" : "Send reset link"}
-          </Button>
-        </form>
-      )}
-    </AuthShell>
+          }
+        >
+          {sent ? (
+            <div className="card-surface flex items-start gap-3 p-5">
+              <MailCheck className="mt-0.5 size-5 shrink-0 text-primary" />
+              <div>
+                <p className="text-sm font-medium">Reset link sent</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Didn&apos;t receive it? Check spam, or{" "}
+                  <button
+                    onClick={() => setSent(false)}
+                    className="font-medium text-primary hover:underline"
+                  >
+                    try another email
+                  </button>
+                  .
+                </p>
+              </div>
+            </div>
+          ) : (
+            <form onSubmit={onSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Work email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@company.com"
+                />
+              </div>
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading && <Loader2 className="size-4 animate-spin" />}
+                {loading ? "Sending link…" : "Send reset link"}
+              </Button>
+            </form>
+          )}
+        </AuthShell>
+      </main>
+      <MarketingFooter />
+    </div>
   );
 }

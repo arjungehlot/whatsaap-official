@@ -22,7 +22,7 @@ export function downloadContactTemplate(_req, res, next) {
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Contacts");
     const buffer = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });
-    res.set({ "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Content-Disposition": "attachment; filename=\"waflow-contact-import-format.xlsx\"", "Content-Length": buffer.length });
+    res.set({ "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Content-Disposition": "attachment; filename=\"whatsaap-contact-import-format.xlsx\"", "Content-Length": buffer.length });
     res.send(buffer);
   } catch (error) {
     next(error);

@@ -20,7 +20,7 @@ export async function ensureDefaultFeatures() {
   const plans = await PlanModel.find().select("_id").lean();
   await Promise.all(plans.map(async (plan) => { if (!(await PlanFeatureModel.exists({ planId: plan._id }))) await PlanFeatureModel.insertMany(core.map((feature) => ({ planId: plan._id, featureId: feature._id, valueType: "boolean", booleanValue: true }))); }));
 }
-export async function ensureTrialPlan() { return PlanModel.findOneAndUpdate({ slug: "free-trial" }, { $set: { isTrial: true, monthlyPrice: 0, yearlyPrice: 0, status: "active", visibility: "public" }, $setOnInsert: { name: "3-Day Free Trial", slug: "free-trial", description: "Try WAFlow free for three days.", currency: "INR", popular: false, displayOrder: -1, trialDays: 3 } }, { upsert: true, returnDocument: "after" }); }
+export async function ensureTrialPlan() { return PlanModel.findOneAndUpdate({ slug: "free-trial" }, { $set: { isTrial: true, monthlyPrice: 0, yearlyPrice: 0, status: "active", visibility: "public" }, $setOnInsert: { name: "3-Day Free Trial", slug: "free-trial", description: "Try Whatsaap free for three days.", currency: "INR", popular: false, displayOrder: -1, trialDays: 3 } }, { upsert: true, returnDocument: "after" }); }
 export async function listPublicPlans() { await normalizeInitialPaidPlanOrder(); const plans = await PlanModel.find({ status: "active", visibility: "public" }).sort({ displayOrder: 1, createdAt: 1 }); return Promise.all(plans.map(serializePlan)); }
 export async function getCurrentSubscription(userId) {
   const now = new Date();
@@ -325,7 +325,7 @@ export async function createCheckout(userId, { planId, billingCycle, phone }) {
       orderId: rzpOrder.id,
       amount: rzpOrder.amount,
       currency: rzpOrder.currency,
-      name: "WAFlow",
+      name: "Whatsaap",
       description: `${plan.name} (${billingCycle}${quote.isUpgrade ? " upgrade" : ""})`,
       prefill: {
         name: user.name || "Customer",
@@ -367,7 +367,7 @@ export async function createCheckout(userId, { planId, billingCycle, phone }) {
   const txnid = payment.gatewayTransactionId;
   const amountValue = quote.amountDue.toFixed(2);
   const productinfo = `${plan.name} (${billingCycle}${quote.isUpgrade ? " upgrade" : ""})`.slice(0, 100);
-  const firstname = (user.name?.trim() || "WAFlow").slice(0, 60);
+  const firstname = (user.name?.trim() || "Whatsaap").slice(0, 60);
   const email = user.email.trim();
   const hashInput = `${env.payuKey}|${txnid}|${amountValue}|${productinfo}|${firstname}|${email}|||||||||||${env.payuSalt}`;
   const hash = crypto.createHash("sha512").update(hashInput).digest("hex");

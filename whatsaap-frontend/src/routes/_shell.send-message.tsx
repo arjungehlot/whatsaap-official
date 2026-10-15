@@ -644,7 +644,7 @@ function SendMessagePage() {
                 </span>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-xs font-bold leading-tight">
-                    {currentAccount?.displayName || "WAFlow Business"}
+                    {currentAccount?.displayName || "Whatsaap Business"}
                   </p>
                   <p className="text-[10px] text-white/80 leading-tight flex items-center gap-1">
                     <span className="size-1.5 rounded-full bg-emerald-400" /> online

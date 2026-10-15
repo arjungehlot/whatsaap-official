@@ -308,7 +308,7 @@ export function buildOpenApiSpec(req) {
           required: ["to"],
           properties: {
             to: { type: "string", example: "+916387850049" },
-            body: { type: "string", maxLength: 4000, example: "Hello from WAFlow API" },
+            body: { type: "string", maxLength: 4000, example: "Hello from Whatsaap API" },
             accountId: { type: "string", description: "Optional opaque channel ID (ch_...) from GET /v1/account/detail. Defaults to the API key's bound channel." },
             attachment: { $ref: "#/components/schemas/TemplateAttachment" },
             attachments: { type: "array", maxItems: 10, items: { $ref: "#/components/schemas/TemplateAttachment" } },
@@ -426,7 +426,7 @@ export function buildOpenApiSpec(req) {
               items: {
                 type: "object",
                 properties: {
-                  jid: { type: "string", example: "254472668336141@lid", description: "Copy this identifier for remove, promote, or demote. WAFlow resolves linked IDs when WhatsApp has synced their phone identity." },
+                  jid: { type: "string", example: "254472668336141@lid", description: "Copy this identifier for remove, promote, or demote. Whatsaap resolves linked IDs when WhatsApp has synced their phone identity." },
                   phone: { type: "string", example: "WhatsApp linked ID" },
                   name: { type: "string" },
                   role: { type: "string", enum: ["member", "admin", "superadmin"] },
@@ -932,7 +932,7 @@ export function buildOpenApiSpec(req) {
         get: operation({
           tags: ["Inbox"],
           summary: "Get members for one selected group conversation",
-          description: "Only call this after selecting a group from GET /inbox/conversations?view=groups. WAFlow uses cached metadata where possible and refreshes one selected group when appropriate.",
+          description: "Only call this after selecting a group from GET /inbox/conversations?view=groups. Whatsaap uses cached metadata where possible and refreshes one selected group when appropriate.",
           parameters: [objectIdParam("id", "Inbox group conversation id")],
           responses: { 200: ok({ type: "object", properties: { group: { $ref: "#/components/schemas/InboxGroupDetails" } } }) },
         }),

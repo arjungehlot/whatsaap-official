@@ -35,7 +35,7 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/_shell/analytics")({
   head: () => ({
     meta: [
-      { title: "Analytics — WAFlow" },
+      { title: "Analytics — Whatsaap" },
     ],
   }),
   component: AnalyticsPage,

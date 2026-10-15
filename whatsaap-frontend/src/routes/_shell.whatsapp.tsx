@@ -68,13 +68,13 @@ import type { ConnectionEvent, SenderReplacementPreview, WhatsAppAccount, WhatsA
 export const Route = createFileRoute("/_shell/whatsapp")({
   head: () => ({
     meta: [
-      { title: "WhatsApp Sessions - WAFlow" },
+      { title: "WhatsApp Sessions - Whatsaap" },
       {
         name: "description",
         content:
           "Manage up to three WhatsApp numbers with QR pairing, live session health, device details and reconnect controls.",
       },
-      { property: "og:title", content: "WhatsApp Sessions - WAFlow" },
+      { property: "og:title", content: "WhatsApp Sessions - Whatsaap" },
       {
         property: "og:description",
         content: "A multi-number WhatsApp session manager with QR pairing and connection history.",
@@ -496,7 +496,7 @@ function WhatsAppPage() {
           open={renameDialogOpen}
           onOpenChange={setRenameDialogOpen}
           title="Rename WhatsApp number"
-          description="This only changes the label shown inside WAFlow. It will not rename the WhatsApp account on your phone."
+          description="This only changes the label shown inside Whatsaap. It will not rename the WhatsApp account on your phone."
           defaultValue={selectedAccount.displayName}
           submitLabel="Save name"
           loading={actionId === `rename-${selectedAccount.id}`}

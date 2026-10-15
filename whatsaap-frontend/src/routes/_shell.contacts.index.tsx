@@ -54,13 +54,13 @@ import { buildPhoneNumber, countryCodes, defaultCountryCode } from "@/lib/phone"
 export const Route = createFileRoute("/_shell/contacts/")({
   head: () => ({
     meta: [
-      { title: "Contacts — WAFlow" },
+      { title: "Contacts — Whatsaap" },
       {
         name: "description",
         content:
           "Manage WhatsApp contacts with tags, segments, custom fields, CSV import and per-contact conversation history.",
       },
-      { property: "og:title", content: "Contacts — WAFlow" },
+      { property: "og:title", content: "Contacts — Whatsaap" },
       {
         property: "og:description",
         content: "Search, tag and segment every WhatsApp contact in your workspace.",
@@ -273,7 +273,7 @@ function ContactsPage() {
           <EmptyState
             icon={Users}
             title="No contacts found"
-            description="Try a different search, or add a contact to bring your audience into WAFlow."
+            description="Try a different search, or add a contact to bring your audience into Whatsaap."
             actions={<AddContactDialog onSaved={load} />}
             className="border-0 shadow-none"
           />
@@ -414,7 +414,7 @@ function ImportDialog({ onImported }: { onImported: () => void }) {
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = "waflow-contact-import-format.xlsx";
+      link.download = "whatsaap-contact-import-format.xlsx";
       document.body.appendChild(link);
       link.click();
       link.remove();

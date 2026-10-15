@@ -3,6 +3,8 @@ import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { AuthShell } from "@/components/auth/AuthShell";
+import { MarketingHeader } from "@/components/marketing/MarketingHeader";
+import { MarketingFooter } from "@/components/marketing/MarketingFooter";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -12,13 +14,13 @@ import { authService } from "@/services";
 export const Route = createFileRoute("/register")({
   head: () => ({
     meta: [
-      { title: "Create your WAFlow account — Free WhatsApp Automation" },
+      { title: "Create your Whatsaap account — Free WhatsApp Automation" },
       {
         name: "description",
         content:
-          "Start free with WAFlow. Connect WhatsApp, import contacts and launch your first automated campaign in minutes.",
+          "Start free with Whatsaap. Connect WhatsApp, import contacts and launch your first automated campaign in minutes.",
       },
-      { property: "og:title", content: "Create your WAFlow account" },
+      { property: "og:title", content: "Create your Whatsaap account" },
       { property: "og:description", content: "Start automating WhatsApp for your business, free." },
     ],
   }),
@@ -61,104 +63,110 @@ function RegisterPage() {
   }
 
   return (
-    <AuthShell
-      title="Create your account"
-      subtitle="Free for 500 contacts. No credit card required."
-      footer={
-        <p>
-          Already have an account?{" "}
-          <Link to="/login" className="font-medium text-primary hover:underline">
-            Log in
-          </Link>
-        </p>
-      }
-    >
-      <form onSubmit={onSubmit} className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="name">Full name</Label>
-          <Input
-            id="name"
-            required
-            value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
-            placeholder="Kashif Ahmad"
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="email">Work email</Label>
-          <Input
-            id="email"
-            type="email"
-            required
-            value={form.email}
-            onChange={(e) => setForm({ ...form, email: e.target.value })}
-            placeholder="you@company.com"
-          />
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              required
-              value={form.password}
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="confirm">Confirm password</Label>
-            <Input
-              id="confirm"
-              type="password"
-              required
-              value={form.confirm}
-              onChange={(e) => setForm({ ...form, confirm: e.target.value })}
-              aria-invalid={mismatch}
-            />
-          </div>
-        </div>
-        {mismatch && <p className="text-xs text-destructive">Passwords do not match.</p>}
-        <div className="flex items-start gap-2">
-          <Checkbox
-            id="terms"
-            checked={accepted}
-            onCheckedChange={(v) => setAccepted(v === true)}
-            className="mt-0.5"
-          />
-          <Label htmlFor="terms" className="text-sm font-normal leading-snug text-muted-foreground">
-            I agree to the Terms of Service and Privacy Policy.
-          </Label>
-        </div>
-        <Button type="submit" className="w-full" disabled={loading}>
-          {loading && <Loader2 className="size-4 animate-spin" />}
-          {loading ? "Creating account…" : "Create account"}
-        </Button>
-
-        <div className="relative py-1 text-center">
-          <span className="relative z-10 bg-background px-3 text-xs text-muted-foreground">
-            or continue with
-          </span>
-          <span className="absolute left-0 top-1/2 h-px w-full bg-border" />
-        </div>
-
-        <Button
-          type="button"
-          variant="outline"
-          className="w-full"
-          onClick={() => {
-            if (!accepted) {
-              toast.error("Please accept the terms to continue");
-              return;
-            }
-            authService.startGoogleLogin();
-          }}
-          disabled={loading}
+    <div className="min-h-screen flex flex-col bg-[#f8fafc]">
+      <MarketingHeader />
+      <main className="flex-1 flex items-center justify-center py-6 sm:py-10 px-2 sm:px-4">
+        <AuthShell
+          title="Create your account"
+          subtitle="Free for 500 contacts. No credit card required."
+          footer={
+            <p>
+              Already have an account?{" "}
+              <Link to="/login" className="font-medium text-primary hover:underline">
+                Log in
+              </Link>
+            </p>
+          }
         >
-          <GoogleMark /> Continue with Google
-        </Button>
-      </form>
-    </AuthShell>
+          <form onSubmit={onSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Full name</Label>
+              <Input
+                id="name"
+                required
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                placeholder="Kashif Ahmad"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Work email</Label>
+              <Input
+                id="email"
+                type="email"
+                required
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                placeholder="you@company.com"
+              />
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  required
+                  value={form.password}
+                  onChange={(e) => setForm({ ...form, password: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirm">Confirm password</Label>
+                <Input
+                  id="confirm"
+                  type="password"
+                  required
+                  value={form.confirm}
+                  onChange={(e) => setForm({ ...form, confirm: e.target.value })}
+                  aria-invalid={mismatch}
+                />
+              </div>
+            </div>
+            {mismatch && <p className="text-xs text-destructive">Passwords do not match.</p>}
+            <div className="flex items-start gap-2">
+              <Checkbox
+                id="terms"
+                checked={accepted}
+                onCheckedChange={(v) => setAccepted(v === true)}
+                className="mt-0.5"
+              />
+              <Label htmlFor="terms" className="text-sm font-normal leading-snug text-muted-foreground">
+                I agree to the Terms of Service and Privacy Policy.
+              </Label>
+            </div>
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading && <Loader2 className="size-4 animate-spin" />}
+              {loading ? "Creating account…" : "Create account"}
+            </Button>
+
+            <div className="relative py-1 text-center">
+              <span className="relative z-10 bg-background px-3 text-xs text-muted-foreground">
+                or continue with
+              </span>
+              <span className="absolute left-0 top-1/2 h-px w-full bg-border" />
+            </div>
+
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={() => {
+                if (!accepted) {
+                  toast.error("Please accept the terms to continue");
+                  return;
+                }
+                authService.startGoogleLogin();
+              }}
+              disabled={loading}
+            >
+              <GoogleMark /> Continue with Google
+            </Button>
+          </form>
+        </AuthShell>
+      </main>
+      <MarketingFooter />
+    </div>
   );
 }
 

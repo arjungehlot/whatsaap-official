@@ -73,7 +73,7 @@ export function Header({ onOpenMobileNav }: { onOpenMobileNav: () => void }) {
         <BreadcrumbList className="gap-1 sm:gap-1.5 text-xs">
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link to="/dashboard" className="text-xs">WAFlow</Link>
+              <Link to="/dashboard" className="text-xs">Whatsaap</Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
           {segments.map((seg, i) => (

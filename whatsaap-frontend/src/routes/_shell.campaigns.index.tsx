@@ -19,7 +19,7 @@ import { dateTime, num, pct } from "@/lib/format";
 import type { Campaign, CampaignStatus } from "@/types";
 
 export const Route = createFileRoute("/_shell/campaigns/")({
-  head: () => ({ meta: [{ title: "Campaigns — WAFlow" }] }),
+  head: () => ({ meta: [{ title: "Campaigns — Whatsaap" }] }),
   component: CampaignsPage,
 });
 

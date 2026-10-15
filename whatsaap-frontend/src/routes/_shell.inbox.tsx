@@ -48,13 +48,13 @@ import type { Conversation, InboxGroupDetails, Message } from "@/types";
 export const Route = createFileRoute("/_shell/inbox")({
   head: () => ({
     meta: [
-      { title: "Team Inbox - WAFlow" },
+      { title: "Team Inbox - Whatsaap" },
       {
         name: "description",
         content:
           "A shared WhatsApp inbox: reply to customers, assign conversations to teammates and keep full message history in one place.",
       },
-      { property: "og:title", content: "Team Inbox - WAFlow" },
+      { property: "og:title", content: "Team Inbox - Whatsaap" },
       {
         property: "og:description",
         content: "Shared WhatsApp inbox with assignment, labels and quick template replies.",

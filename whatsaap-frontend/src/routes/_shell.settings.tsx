@@ -15,13 +15,13 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/_shell/settings")({
   head: () => ({
     meta: [
-      { title: "Settings — WAFlow" },
+      { title: "Settings — Whatsaap" },
       {
         name: "description",
         content:
-          "Manage your WAFlow profile, WhatsApp connection, notifications, security, team and API access.",
+          "Manage your Whatsaap profile, WhatsApp connection, notifications, security, team and API access.",
       },
-      { property: "og:title", content: "Settings — WAFlow" },
+      { property: "og:title", content: "Settings — Whatsaap" },
       { property: "og:description", content: "Workspace settings for your WhatsApp automation." },
     ],
   }),

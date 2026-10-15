@@ -41,7 +41,7 @@ export const webhookEndpoints: WebhookEndpoint[] = [
   {
     id: "wh_01hq9",
     name: "CRM sync",
-    url: "https://api.acme-crm.com/hooks/waflow",
+    url: "https://api.acme-crm.com/hooks/whatsaap",
     status: "active",
     events: ["message.received", "message.delivered", "contact.created", "contact.updated"],
     secret: "whsec_9f21ab7c4d5e6f8091a2b3c4d5e6f708",
@@ -57,7 +57,7 @@ export const webhookEndpoints: WebhookEndpoint[] = [
   {
     id: "wh_02kt4",
     name: "Campaign analytics warehouse",
-    url: "https://ingest.warehouse.internal/v2/waflow-events",
+    url: "https://ingest.warehouse.internal/v2/whatsaap-events",
     status: "active",
     events: ["campaign.started", "campaign.completed", "message.sent", "message.read"],
     secret: "whsec_1c0d2e3f4a5b6c7d8e9f0a1b2c3d4e5f",
@@ -72,7 +72,7 @@ export const webhookEndpoints: WebhookEndpoint[] = [
   {
     id: "wh_03mz8",
     name: "Ops alerting (Slack relay)",
-    url: "https://hooks.opsrelay.io/waflow/session-alerts",
+    url: "https://hooks.opsrelay.io/whatsaap/session-alerts",
     status: "failing",
     events: ["session.disconnected", "message.failed"],
     secret: "whsec_ab12cd34ef56ab78cd90ef12ab34cd56",
@@ -88,7 +88,7 @@ export const webhookEndpoints: WebhookEndpoint[] = [
   {
     id: "wh_04pq1",
     name: "Staging sandbox",
-    url: "https://staging.acme-crm.com/hooks/waflow",
+    url: "https://staging.acme-crm.com/hooks/whatsaap",
     status: "paused",
     events: ["message.sent"],
     secret: "whsec_77aa88bb99cc00dd11ee22ff33445566",
@@ -325,14 +325,14 @@ const jsonBody = (example: Record<string, unknown>) => ({
 export const openApiSpec = {
   openapi: "3.1.0",
   info: {
-    title: "WAFlow API",
+    title: "Whatsaap API",
     version: "2026-06-01",
     description:
       "Send WhatsApp messages, manage contacts, run campaigns and subscribe to events. All requests require a bearer API key.",
   },
   servers: [
-    { url: "https://api.waflow.io/v1", description: "Production" },
-    { url: "https://sandbox.api.waflow.io/v1", description: "Sandbox" },
+    { url: "https://api.whatsaap.io/v1", description: "Production" },
+    { url: "https://sandbox.api.whatsaap.io/v1", description: "Sandbox" },
   ],
   tags: [
     { name: "Messages", description: "Send and inspect WhatsApp messages." },
@@ -483,7 +483,7 @@ export const openApiSpec = {
         responses: {
           "200": {
             description: "Endpoints",
-            content: jsonBody({ data: [{ id: "wh_01hq9", url: "https://api.acme-crm.com/hooks/waflow", events: ["message.received"] }] }),
+            content: jsonBody({ data: [{ id: "wh_01hq9", url: "https://api.acme-crm.com/hooks/whatsaap", events: ["message.received"] }] }),
           },
         },
       },
@@ -493,7 +493,7 @@ export const openApiSpec = {
         parameters: [],
         requestBody: {
           required: true,
-          content: jsonBody({ url: "https://example.com/hooks/waflow", events: ["message.delivered", "message.failed"] }),
+          content: jsonBody({ url: "https://example.com/hooks/whatsaap", events: ["message.delivered", "message.failed"] }),
         },
         responses: {
           "201": { description: "Created", content: jsonBody({ id: "wh_05aa2", secret: "whsec_…", status: "active" }) },
@@ -563,12 +563,12 @@ export function flattenSpec(): SpecOperation[] {
 }
 
 export const codeSamples = (op: SpecOperation) => {
-  const url = `https://api.waflow.io/v1${op.path.replace(/\{(\w+)\}/g, (_m, p) => `{${p}}`)}`;
+  const url = `https://api.whatsaap.io/v1${op.path.replace(/\{(\w+)\}/g, (_m, p) => `{${p}}`)}`;
   const body = op.requestExample ? JSON.stringify(op.requestExample, null, 2) : null;
   return {
     curl: [
       `curl -X ${op.method.toUpperCase()} "${url}" \\`,
-      `  -H "Authorization: Bearer $WAFLOW_API_KEY" \\`,
+      `  -H "Authorization: Bearer $WHATSAAP_API_KEY" \\`,
       `  -H "Content-Type: application/json"${body ? " \\" : ""}`,
       ...(body ? [`  -d '${body.replace(/\n/g, "\n  ")}'`] : []),
     ].join("\n"),
@@ -576,7 +576,7 @@ export const codeSamples = (op: SpecOperation) => {
       `const res = await fetch("${url}", {`,
       `  method: "${op.method.toUpperCase()}",`,
       `  headers: {`,
-      `    Authorization: \`Bearer \${process.env.WAFLOW_API_KEY}\`,`,
+      `    Authorization: \`Bearer \${process.env.WHATSAAP_API_KEY}\`,`,
       `    "Content-Type": "application/json",`,
       `  },`,
       ...(body ? [`  body: JSON.stringify(${body.replace(/\n/g, "\n  ")}),`] : []),
@@ -588,7 +588,7 @@ export const codeSamples = (op: SpecOperation) => {
       ``,
       `res = requests.${op.method}(`,
       `    "${url}",`,
-      `    headers={"Authorization": f"Bearer {os.environ['WAFLOW_API_KEY']}"},`,
+      `    headers={"Authorization": f"Bearer {os.environ['WHATSAAP_API_KEY']}"},`,
       ...(body ? [`    json=${body.replace(/\n/g, "\n    ")},`] : []),
       `)`,
       `print(res.json())`,

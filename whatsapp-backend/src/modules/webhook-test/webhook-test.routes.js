@@ -6,7 +6,7 @@ const MAX_EVENTS = 100;
 export const webhookTestRouter = Router();
 
 webhookTestRouter.get("/testworkflow", (_req, res) => {
-  res.json({ success: true, receiver: "WAFlow webhook test receiver", received: receivedEvents });
+  res.json({ success: true, receiver: "Whatsaap webhook test receiver", received: receivedEvents });
 });
 
 webhookTestRouter.post("/testworkflow", (req, res) => {
@@ -20,8 +20,8 @@ webhookTestRouter.post("/testworkflow", (req, res) => {
 
   const event = {
     receivedAt: new Date().toISOString(),
-    event: req.headers["x-waflow-event"] || payload.type || "unknown",
-    deliveryId: req.headers["x-waflow-delivery"] || null,
+    event: req.headers["x-whatsaap-event"] || req.headers["x-waflow-event"] || payload.type || "unknown",
+    deliveryId: req.headers["x-whatsaap-delivery"] || req.headers["x-waflow-delivery"] || null,
     payload,
   };
   receivedEvents.unshift(event);

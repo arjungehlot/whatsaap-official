@@ -6,6 +6,7 @@ import {
   useRouter,
   HeadContent,
   Scripts,
+  type ErrorComponentProps,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 import { Toaster } from "@/components/ui/sonner";
@@ -17,8 +18,8 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 
 const dynamicImportFailurePattern = /failed to fetch dynamically imported module|error loading dynamically imported module|importing a module script failed/i;
 
-function isDynamicImportFailure(error: Error) {
-  return dynamicImportFailurePattern.test(error.message);
+function isDynamicImportFailure(error: unknown): error is Error {
+  return error instanceof Error && dynamicImportFailurePattern.test(error.message);
 }
 
 function NotFoundComponent() {
@@ -43,14 +44,14 @@ function NotFoundComponent() {
   );
 }
 
-function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
+function ErrorComponent({ error, reset }: ErrorComponentProps) {
   console.error(error);
   const router = useRouter();
   useEffect(() => {
     if (isDynamicImportFailure(error)) {
       // A deployment can replace a lazily loaded hashed chunk while an older
       // app shell is still open. Reload once for this exact failed chunk.
-      const retryKey = `waflow:dynamic-import-reload:${error.message}`;
+      const retryKey = `whatsaap:dynamic-import-reload:${error.message}`;
       try {
         if (!window.sessionStorage.getItem(retryKey)) {
           window.sessionStorage.setItem(retryKey, "1");
@@ -106,16 +107,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, maximum-scale=1" },
-      { title: "Whatsapp Automation" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Whatsapp Automation" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "Whatsaap — WhatsApp Automation & Marketing Platform" },
+      { name: "description", content: "Supercharge your business with Whatsaap: broadcast campaigns, AI auto-replies, multi-agent inbox, and enterprise WhatsApp API." },
+      { name: "author", content: "Whatsaap" },
+      { property: "og:title", content: "Whatsaap — WhatsApp Automation & Marketing Platform" },
+      { property: "og:description", content: "Supercharge your business with Whatsaap: broadcast campaigns, AI auto-replies, multi-agent inbox, and enterprise WhatsApp API." },
       { property: "og:type", content: "website" },
       { property: "og:image", content: openGraphImageUrl },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:image", content: openGraphImageUrl },
-      { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:site", content: "@Whatsaap" },
     ],
     links: [
       {

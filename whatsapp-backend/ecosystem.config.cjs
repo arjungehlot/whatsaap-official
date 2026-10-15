@@ -1,7 +1,7 @@
 module.exports = {
   apps: [
     {
-      name: "waflow-backend",
+      name: "whatsaap-backend",
       script: "src/server.js",
       cwd: __dirname,
       interpreter: "node",

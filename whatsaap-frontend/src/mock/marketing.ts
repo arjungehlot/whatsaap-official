@@ -44,7 +44,7 @@ export const featureCards = [
 export const steps = [
   {
     title: "Connect WhatsApp",
-    body: "Scan a QR code once. WAFlow keeps the session alive and alerts you if it ever drops.",
+    body: "Scan a QR code once. Whatsaap keeps the session alive and alerts you if it ever drops.",
   },
   {
     title: "Bring in your contacts",
@@ -62,12 +62,12 @@ export const steps = [
 
 export const faqs = [
   {
-    q: "Do I need the WhatsApp Business API to use WAFlow?",
+    q: "Do I need the WhatsApp Business API to use Whatsaap?",
     a: "No. You link your existing WhatsApp number from the dashboard using a QR code, the same way WhatsApp Web works. Business API support is on the roadmap for high-volume senders.",
   },
   {
     q: "How many messages can I send per day?",
-    a: "Sending limits depend on your plan and your number's own reputation. WAFlow lets you set a delivery rate so campaigns go out at a safe, natural pace.",
+    a: "Sending limits depend on your plan and your number's own reputation. Whatsaap lets you set a delivery rate so campaigns go out at a safe, natural pace.",
   },
   {
     q: "Can my team share one inbox?",

@@ -41,7 +41,7 @@ const GROUP_METADATA_RATE_LIMIT_TTL_MS = 15 * 60 * 1000;
 const GROUP_METADATA_ERROR_TTL_MS = 2 * 60 * 1000;
 const GROUP_METADATA_AUTO_REFRESH_GAP_MS = 1500;
 const DUPLICATE_PHONE_MESSAGE =
-  "This WhatsApp number is already connected to another WAFlow account. Disconnect it there before linking it here.";
+  "This WhatsApp number is already connected to another Whatsaap account. Disconnect it there before linking it here.";
 
 async function getCachedGroupMetadata(sock, accountId, remoteJid, options = {}) {
   const cacheKey = `${accountId}:${remoteJid}`;
@@ -550,7 +550,7 @@ async function createSocket(account, options = {}) {
   const { version } = await fetchLatestBaileysVersion();
   const sock = makeWASocket({
     auth: state,
-    browser: ["WAFlow", "Chrome", "1.0.0"],
+    browser: ["Whatsaap", "Chrome", "1.0.0"],
     logger,
     printQRInTerminal: false,
     version,

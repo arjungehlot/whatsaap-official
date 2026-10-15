@@ -37,10 +37,10 @@ import type { ApiKey, WhatsAppAccount } from "@/types";
 export const Route = createFileRoute("/_shell/api-docs")({
   head: () => ({
     meta: [
-      { title: "API & Documentation - WAFlow" },
-      { name: "description", content: "Live WAFlow API documentation generated from the current backend." },
-      { property: "og:title", content: "API & Documentation - WAFlow" },
-      { property: "og:description", content: "Swagger-powered REST API reference for the current WAFlow backend." },
+      { title: "API & Documentation - Whatsaap" },
+      { name: "description", content: "Live Whatsaap API documentation generated from the current backend." },
+      { property: "og:title", content: "API & Documentation - Whatsaap" },
+      { property: "og:description", content: "Swagger-powered REST API reference for the current Whatsaap backend." },
     ],
   }),
   component: ApiDocsPage,
@@ -58,14 +58,17 @@ type SwaggerRequest = {
   headers?: Record<string, string>;
 };
 
-const AUTH_KEY = "waflow.session";
-const API_KEY_STORAGE_KEY = "waflow.docs.apiKey";
-const API_KEY_VAULT_STORAGE_KEY = "waflow.docs.apiKeyVault";
+const AUTH_KEY = "whatsaap.session";
+const LEGACY_AUTH_KEY = "waflow.session";
+const API_KEY_STORAGE_KEY = "whatsaap.docs.apiKey";
+const LEGACY_API_KEY_STORAGE_KEY = "waflow.docs.apiKey";
+const API_KEY_VAULT_STORAGE_KEY = "whatsaap.docs.apiKeyVault";
+const LEGACY_API_KEY_VAULT_STORAGE_KEY = "waflow.docs.apiKeyVault";
 const API_BASE_URL = (import.meta.env["VITE_API_BASE_URL"] || "http://localhost:5000/api").replace(/\/$/, "");
 
 function getToken() {
   if (typeof window === "undefined") return "";
-  return window.localStorage.getItem(AUTH_KEY) || "";
+  return window.localStorage.getItem(AUTH_KEY) || window.localStorage.getItem(LEGACY_AUTH_KEY) || "";
 }
 
 function copy(value: string, label: string) {
@@ -76,7 +79,11 @@ function copy(value: string, label: string) {
 function getApiKeyVault() {
   if (typeof window === "undefined") return {} as Record<string, string>;
   try {
-    return JSON.parse(window.localStorage.getItem(API_KEY_VAULT_STORAGE_KEY) || "{}") as Record<string, string>;
+    return JSON.parse(
+      window.localStorage.getItem(API_KEY_VAULT_STORAGE_KEY) ||
+      window.localStorage.getItem(LEGACY_API_KEY_VAULT_STORAGE_KEY) ||
+      "{}"
+    ) as Record<string, string>;
   } catch (_error) {
     return {} as Record<string, string>;
   }
@@ -110,7 +117,13 @@ function ApiDocsPage() {
   const [spec, setSpec] = useState<OpenApiSpec | null>(null);
   const [keys, setKeys] = useState<ApiKey[]>([]);
   const [accounts, setAccounts] = useState<WhatsAppAccount[]>([]);
-  const [apiKey, setApiKey] = useState(() => (typeof window === "undefined" ? "" : window.localStorage.getItem(API_KEY_STORAGE_KEY) || ""));
+  const [apiKey, setApiKey] = useState(() => (
+    typeof window === "undefined"
+      ? ""
+      : window.localStorage.getItem(API_KEY_STORAGE_KEY) ||
+        window.localStorage.getItem(LEGACY_API_KEY_STORAGE_KEY) ||
+        ""
+  ));
   const [newKeyLabel, setNewKeyLabel] = useState("Production integration");
   const [newKeyAccountId, setNewKeyAccountId] = useState("");
   const [editingKey, setEditingKey] = useState<ApiKey | null>(null);
@@ -367,7 +380,7 @@ function ApiDocsPage() {
               description={`${error}. Check that the backend is running and VITE_API_BASE_URL points to the correct API.`}
             />
           ) : swaggerSpec ? (
-            <div className="waflow-swagger overflow-hidden rounded-xl border border-border bg-white shadow-card">
+            <div className="whatsaap-swagger overflow-hidden rounded-xl border border-border bg-white shadow-card">
               <SwaggerUI
                 spec={swaggerSpec}
                 docExpansion="list"

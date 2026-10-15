@@ -1,8 +1,7 @@
 import { useState, useEffect, type ReactNode } from "react"; 
 import { Link } from "@tanstack/react-router";
 import { Zap, Users, BarChart2 } from "lucide-react";
-import logoLight from "@/Assets/LogoLight.png";
-import logoLightText from "@/Assets/LogoLight1.png";
+import logoLight from "@/Assets/LogoLight1.png";
 import logoDark from "@/Assets/LogoDark.png";
 import login3D from "@/Assets/Login.png";
 
@@ -18,8 +17,8 @@ export function AuthShell({
   footer?: ReactNode;
 }) {
   return (
-    <div className="min-h-[100dvh] flex items-center justify-center bg-[#f4f7f9] p-4 sm:p-6 md:p-8 overflow-y-auto">
-      <div className="grid w-full max-w-[1536px] lg:w-[90vw] min-h-[580px] lg:h-[90vh] lg:max-h-[800px] my-auto bg-white rounded-[1.5rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] overflow-hidden lg:grid-cols-[1.5fr_1fr] relative z-10">
+    <div className="w-full flex items-center justify-center p-2 sm:p-4 md:p-6">
+      <div className="grid w-full max-w-[1440px] min-h-[580px] lg:min-h-[660px] my-auto bg-white rounded-[1.5rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.08)] border border-slate-100 overflow-hidden lg:grid-cols-[1.4fr_1fr] relative z-10">
         {/* LEFT SIDE: Promotional / Branding (Hidden on mobile) */}
         <div className="relative hidden flex-col justify-between overflow-hidden bg-[#e0f8ee]/30 border-r border-slate-100 lg:flex px-8 py-8 xl:px-10">
         {/* Animated Background Effects */}
@@ -32,7 +31,7 @@ export function AuthShell({
         {/* Top bar with Logo */}
         <div className="relative z-10 flex flex-col justify-start">
           <Link to="/">
-            <img src={logoLight} className="h-14" alt="WAFlow Logo" />
+            <img src={logoLight} className="h-14 w-auto" alt="Whatsaap Logo" />
           </Link>
         </div>
 
@@ -120,8 +119,8 @@ export function AuthShell({
                 <div className="h-[60px] w-[70px] flex items-center pt-4 justify-center overflow-hidden shrink-0 mix-blend-multiply">
                   <video src="/LogoIcon.mp4" autoPlay loop muted playsInline className="scale-[.9] min-w-[220px]" />
                 </div>
-                <img src={logoLightText} className="h-14 w-auto dark:hidden block" alt="WAFlow Logo" />
-                <img src={logoDark} className="h-14 w-auto hidden dark:block" alt="WAFlow Logo" />
+                <img src={logoLight} className="h-14 w-auto dark:hidden block" alt="Whatsaap Logo" />
+                <img src={logoDark} className="h-14 w-auto hidden dark:block" alt="Whatsaap Logo" />
               </div>
               <h1 className="text-2xl font-bold tracking-tight text-slate-900">{title}</h1>
               <p className="mt-2 text-sm text-slate-500 font-medium">{subtitle}</p>

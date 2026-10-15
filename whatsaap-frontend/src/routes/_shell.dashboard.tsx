@@ -34,13 +34,13 @@ import dashboardTopImg from "@/Assets/DashboardTop.png";
 export const Route = createFileRoute("/_shell/dashboard")({
   head: () => ({
     meta: [
-      { title: "Dashboard — WAFlow" },
+      { title: "Dashboard — Whatsaap" },
       {
         name: "description",
         content:
           "Track messages sent, delivery rates, active campaigns and recent conversations across your WhatsApp workspace.",
       },
-      { property: "og:title", content: "WAFlow Dashboard" },
+      { property: "og:title", content: "Whatsaap Dashboard" },
       {
         property: "og:description",
         content: "Live WhatsApp messaging KPIs, campaign progress and recent conversations.",

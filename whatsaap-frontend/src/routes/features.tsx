@@ -21,17 +21,17 @@ import { featureCards } from "@/mock/marketing";
 export const Route = createFileRoute("/features")({
   head: () => ({
     meta: [
-      { title: "Features — WAFlow WhatsApp Automation Platform" },
+      { title: "Features — Whatsaap Automation Platform" },
       {
         name: "description",
         content:
-          "Explore WAFlow features: WhatsApp connection, team inbox, contacts, campaigns, templates, visual automations, analytics and message logs.",
+          "Explore Whatsaap features: WhatsApp connection, team inbox, contacts, campaigns, templates, visual automations, analytics and message logs.",
       },
-      { property: "og:title", content: "WAFlow Features" },
+      { property: "og:title", content: "Whatsaap Features" },
       {
         property: "og:description",
         content:
-          "Everything WAFlow gives your team: campaigns, shared inbox, automations, templates and delivery analytics.",
+          "Everything Whatsaap gives your team: campaigns, shared inbox, automations, templates and delivery analytics.",
       },
     ],
   }),
@@ -105,13 +105,13 @@ function FeaturesPage() {
         <div className="relative mx-auto max-w-4xl px-5 text-center lg:px-8">
           <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-medium text-primary shadow-sm backdrop-blur-md transition-colors hover:bg-primary/10">
             <Sparkles className="size-3.5" />
-            <span>Discover WAFlow Features</span>
+            <span>Discover Whatsaap Features</span>
           </div>
           <h1 className="text-4xl font-bold tracking-tight lg:text-5xl">
             One platform for every <span className="text-gradient-brand">WhatsApp workflow</span>
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-muted-foreground lg:text-lg">
-            WAFlow replaces the spreadsheet, the personal phone and the guesswork with a single
+            Whatsaap replaces the spreadsheet, the personal phone and the guesswork with a single
             dashboard your whole team can use.
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">

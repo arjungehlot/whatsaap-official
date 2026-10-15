@@ -1,11 +1,11 @@
-@import "tailwindcss" source(none);
+@import "tailwindcss";
 @source "../src";
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
 /*
- * WAFlow design system.
+ * Whatsaap design system.
  * Light, premium B2B SaaS. Deep green primary, charcoal secondary.
  * All colors are oklch semantic tokens — never hardcode colors in components.
  */
@@ -226,6 +226,6 @@
 }
 
 /* Only hide the Swagger topbar — it's redundant inside the app shell */
-.waflow-swagger .swagger-ui .topbar {
+.whatsaap-swagger .swagger-ui .topbar {
   display: none;
 }

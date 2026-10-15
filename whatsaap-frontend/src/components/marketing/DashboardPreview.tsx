@@ -11,7 +11,7 @@ export function DashboardPreview() {
         <span className="size-2.5 rounded-full bg-warning/70" />
         <span className="size-2.5 rounded-full bg-success/60" />
         <span className="ml-3 rounded-md bg-surface px-2.5 py-1 text-[11px] text-muted-foreground">
-          app.waflow.io/dashboard
+          app.whatsaap.io/dashboard
         </span>
       </div>
 
@@ -21,7 +21,7 @@ export function DashboardPreview() {
             <span className="flex size-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
               <MessageSquareText className="size-3" />
             </span>
-            <span className="text-xs font-semibold">WAFlow</span>
+            <span className="text-xs font-semibold">Whatsaap</span>
           </div>
           {["Dashboard", "Inbox", "Contacts", "Campaigns", "Automations", "Analytics"].map(
             (l, i) => (

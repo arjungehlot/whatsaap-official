@@ -22,7 +22,7 @@ import type { Template } from "@/types";
 import { num, relative } from "@/lib/format";
 
 export const Route = createFileRoute("/_shell/templates/")({
-  head: () => ({ meta: [{ title: "Message Templates — WAFlow" }] }),
+  head: () => ({ meta: [{ title: "Message Templates — Whatsaap" }] }),
   component: TemplatesPage,
 });
 

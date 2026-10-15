@@ -1,4 +1,4 @@
-// Domain types for WAFlow. Mock data + future REST/WebSocket responses share these shapes.
+// Domain types for Whatsaap. Mock data + future REST/WebSocket responses share these shapes.
 
 export interface User {
   id: string;

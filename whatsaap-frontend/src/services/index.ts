@@ -52,8 +52,10 @@ type CampaignRecipient = {
   error?: string | null;
 };
 
-const AUTH_KEY = "waflow.session";
-const USER_KEY = "waflow.user";
+const AUTH_KEY = "whatsaap.session";
+const LEGACY_AUTH_KEY = "waflow.session";
+const USER_KEY = "whatsaap.user";
+const LEGACY_USER_KEY = "waflow.user";
 const API_BASE_URL = import.meta.env["VITE_API_BASE_URL"] || "http://localhost:5000/api";
 
 let workspaceRequest: { token: string; promise: Promise<WorkspaceSnapshot> } | null = null;
@@ -146,13 +148,15 @@ type CampaignStreamEvent = {
 
 function getToken() {
   if (typeof window === "undefined") return null;
-  return window.localStorage.getItem(AUTH_KEY);
+  return window.localStorage.getItem(AUTH_KEY) || window.localStorage.getItem(LEGACY_AUTH_KEY);
 }
 
 function setSession(payload: AuthPayload) {
   if (typeof window === "undefined") return;
   window.localStorage.setItem(AUTH_KEY, payload.token);
   window.localStorage.setItem(USER_KEY, JSON.stringify(payload.user));
+  window.localStorage.removeItem(LEGACY_AUTH_KEY);
+  window.localStorage.removeItem(LEGACY_USER_KEY);
   workspaceRequest = null;
   workspaceCache = null;
   sessionRevision += 1;
@@ -191,6 +195,8 @@ async function apiRequest<T>(path: string, options: RequestInit = {}): Promise<T
     if (!isAuthRequest && !isLoginPage) {
       window.localStorage.removeItem(AUTH_KEY);
       window.localStorage.removeItem(USER_KEY);
+      window.localStorage.removeItem(LEGACY_AUTH_KEY);
+      window.localStorage.removeItem(LEGACY_USER_KEY);
       window.location.assign("/login?reason=session_expired");
       throw new Error("Your session has expired. Please log in again.");
     }
@@ -210,7 +216,7 @@ async function apiRequest<T>(path: string, options: RequestInit = {}): Promise<T
 export const authService = {
   isAuthenticated(): boolean {
     if (typeof window === "undefined") return false;
-    return Boolean(window.localStorage.getItem(AUTH_KEY));
+    return Boolean(getToken());
   },
   async login(email: string, password: string): Promise<User> {
     const data = await apiRequest<AuthPayload>("/auth/login", {
@@ -282,11 +288,13 @@ export const authService = {
     if (typeof window === "undefined") return;
     window.localStorage.removeItem(AUTH_KEY);
     window.localStorage.removeItem(USER_KEY);
+    window.localStorage.removeItem(LEGACY_AUTH_KEY);
+    window.localStorage.removeItem(LEGACY_USER_KEY);
     invalidateWorkspaceSnapshot();
   },
   currentUser(): User {
     if (typeof window !== "undefined") {
-      const stored = window.localStorage.getItem(USER_KEY);
+      const stored = window.localStorage.getItem(USER_KEY) || window.localStorage.getItem(LEGACY_USER_KEY);
       if (stored) return JSON.parse(stored) as User;
     }
     return currentUser;

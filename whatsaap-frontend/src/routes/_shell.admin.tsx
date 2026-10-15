@@ -402,7 +402,7 @@ function PlanEditorFields({
         <div>
           <h3 className="font-semibold">Feature access</h3>
           <p className="mt-1 text-sm text-muted-foreground">
-            Select only the WAFlow capabilities this plan should unlock for a user.
+            Select only the Whatsaap capabilities this plan should unlock for a user.
           </p>
         </div>
         <CapabilityChecklist
@@ -736,10 +736,8 @@ function AdminPage() {
         monthlyMessageCredits: Number(editDraft.monthlyMessageCredits || 0),
         dailyMessageCredits: Number(editDraft.dailyMessageCredits || 0),
         features: makeAssignments(features, editFeatureIds, editValues),
+        ...(editDraft.isTrial && editDraft.trialDays ? { trialDays: Number(editDraft.trialDays) } : {}),
       };
-      if (editDraft.isTrial && editDraft.trialDays) {
-        payload.trialDays = Number(editDraft.trialDays);
-      }
       await adminService.updatePlan(planId, payload);
       setEditingPlan(null);
       await load();

@@ -87,7 +87,9 @@ async function deliver(endpoint, event, requestBody, attempt = 1) {
       method: "POST",
       headers: {
         "content-type": "application/json",
-        "user-agent": "WAFlow-Webhooks/1.0",
+        "user-agent": "Whatsaap-Webhooks/1.0",
+        "x-whatsaap-event": event,
+        "x-whatsaap-delivery": delivery._id.toString(),
         "x-waflow-event": event,
         "x-waflow-delivery": delivery._id.toString(),
       },
@@ -166,7 +168,7 @@ export async function sendWebhookTest(userId, id) {
   const endpoint = await WebhookEndpointModel.findOne({ _id: id, userId }).lean();
   if (!endpoint) throw new ApiError(404, "Webhook endpoint not found");
   const event = endpoint.events[0] || "message.sent";
-  const result = await deliver(endpoint, event, eventPayload(event, { test: true, message: "This is a WAFlow test event." }, endpoint));
+  const result = await deliver(endpoint, event, eventPayload(event, { test: true, message: "This is a Whatsaap test event." }, endpoint));
   return visibleDelivery(result);
 }
 

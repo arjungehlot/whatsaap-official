@@ -32,6 +32,6 @@ try {
     setInterval(() => void dispatchPendingMessagesForConnectedAccounts().catch((error) => console.error("Outbound dispatcher error", error)), 15_000);
   });
 } catch (error) {
-  console.error("Failed to start WAFlow API", error);
+  console.error("Failed to start Whatsaap API", error);
   process.exit(1);
 }

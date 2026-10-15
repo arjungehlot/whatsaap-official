@@ -58,16 +58,16 @@ import type { WebhookDelivery, WebhookEndpoint, WebhookEventDefinition } from "@
 export const Route = createFileRoute("/_shell/webhooks")({
   head: () => ({
     meta: [
-      { title: "Webhooks — WAFlow Developers" },
+      { title: "Webhooks — Whatsaap Developers" },
       {
         name: "description",
         content:
           "Create webhook endpoints, subscribe to WhatsApp message and campaign events, inspect deliveries and replay failed attempts.",
       },
-      { property: "og:title", content: "Webhooks — WAFlow Developers" },
+      { property: "og:title", content: "Webhooks — Whatsaap Developers" },
       {
         property: "og:description",
-        content: "Manage event subscriptions and inspect webhook delivery logs in WAFlow.",
+        content: "Manage event subscriptions and inspect webhook delivery logs in Whatsaap.",
       },
     ],
   }),
@@ -369,7 +369,7 @@ function WebhooksPage() {
                   </Button>
                   <ConfirmDialog
                     title="Delete this endpoint?"
-                    description="WAFlow will stop sending events to this URL. Delivery history will be removed."
+                    description="Whatsaap will stop sending events to this URL. Delivery history will be removed."
                     confirmLabel="Delete endpoint"
                     onConfirm={() => remove(selected.id)}
                     trigger={
@@ -689,7 +689,7 @@ function CreateEndpointDialog({
                 <input
                   id="wh-url"
                   name="url"
-                  placeholder="https://api.example.com/hooks/waflow"
+                  placeholder="https://api.example.com/hooks/whatsaap"
                   className="flex-1 h-7 bg-transparent px-2 text-xs !text-xs md:!text-xs text-slate-900 placeholder:text-slate-400 placeholder:text-[11px] focus:outline-hidden font-mono"
                   required
                 />

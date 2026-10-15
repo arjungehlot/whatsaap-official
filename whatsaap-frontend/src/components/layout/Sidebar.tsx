@@ -89,16 +89,16 @@ export function Logo({ collapsed = false }: { collapsed?: boolean }) {
   return (
     <Link to="/" className="flex items-center gap-2">
       {collapsed ? (
-        <div className="h-8 w-8 flex items-center justify-center overflow-hidden shrink-0 mix-blend-multiply">
+        <div className="h-8 w-8 flex items-center justify-center overflow-hidden shrink-0 dark:mix-blend-normal mix-blend-multiply">
           <video src="/LogoIcon.mp4" autoPlay loop muted playsInline className="scale-[.75] min-w-[120px]" />
         </div>
       ) : (
         <>
-          <div className="h-8 w-8 flex items-center justify-center overflow-hidden shrink-0 mix-blend-multiply">
+          <div className="h-8 w-8 flex items-center justify-center overflow-hidden shrink-0 dark:mix-blend-normal mix-blend-multiply">
             <video src="/LogoIcon.mp4" autoPlay loop muted playsInline className="scale-[.85] min-w-[120px]" />
           </div>
-          <img src={LogoLight} alt="WAFlow Logo" className="h-8 w-auto dark:hidden" />
-          <img src={LogoDark} alt="WAFlow Logo" className="hidden h-8 w-auto dark:block" />
+          <img src={LogoLight} alt="Whatsaap Logo" className="h-8 w-auto dark:hidden" />
+          <img src={LogoDark} alt="Whatsaap Logo" className="hidden h-8 w-auto dark:block" />
         </>
       )}
     </Link>

@@ -19,7 +19,7 @@ import { useRequestFence } from "@/hooks/use-request-fence";
 import { useRefreshMessageCredits } from "@/hooks/use-workspace-snapshot";
 
 export const Route = createFileRoute("/_shell/campaigns/create")({
-  head: () => ({ meta: [{ title: "Create Campaign — WAFlow" }] }),
+  head: () => ({ meta: [{ title: "Create Campaign — Whatsaap" }] }),
   component: CreateCampaignPage,
 });
 
