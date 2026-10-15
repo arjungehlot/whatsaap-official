@@ -22,7 +22,7 @@ try {
   await runDueAutomations();
 
   app.listen(env.port, () => {
-    console.log(`WAFlow API running on http://localhost:${env.port}`);
+    console.log(`Whatsaap API running on http://localhost:${env.port}`);
     console.log(`WhatsApp auto-connect restored ${restoredSockets} session(s)`);
     console.log(`Campaign scheduler restored ${restoredCampaigns} campaign(s)`);
     console.log(`Message scheduler restored ${restoredMessageJobs} job(s)`);

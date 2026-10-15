@@ -57,7 +57,7 @@ app.use(express.urlencoded({ extended: false, limit: "1mb" }));
 app.use(morgan(env.nodeEnv === "production" ? "combined" : "dev"));
 
 app.get("/api/health", (_req, res) => {
-  res.json({ success: true, message: "WAFlow API is running" });
+  res.json({ success: true, message: "Whatsaap API is running" });
 });
 
 app.use("/api/auth", authRouter);
