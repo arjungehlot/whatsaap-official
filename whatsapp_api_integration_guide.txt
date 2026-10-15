@@ -1,0 +1,428 @@
+================================================================================
+NEAR ME TEACHER - WHATSAPP API INTEGRATION GUIDE & DOCUMENTATION
+================================================================================
+
+1. API CREDENTIALS & LIVE CONFIGURATION
+--------------------------------------------------------------------------------
+Base URL:          https://whatsaapapi.nearmeteacher.in/api
+API Key:           wf_live_h7exzBR8KFIBPzr78W4xqN9yuaISEYCWd3rnvZGy2Pw
+Connected Phone:   +918103383910 (Channel: Nearmeteacher)
+Status:            CONNECTED
+Plan:              Business
+Auth Header:       x-api-key: wf_live_h7exzBR8KFIBPzr78W4xqN9yuaISEYCWd3rnvZGy2Pw
+Content-Type:      application/json
+
+
+2. API ENDPOINTS REFERENCE
+--------------------------------------------------------------------------------
+1) Send WhatsApp Message (Text, Media, PDF, Buttons):
+   POST https://whatsaapapi.nearmeteacher.in/api/v1/message/create
+
+2) Send WhatsApp Message using Saved Template:
+   POST https://whatsaapapi.nearmeteacher.in/api/v1/message/createFromTemplate
+
+3) Check Message Delivery Status:
+   GET https://whatsaapapi.nearmeteacher.in/api/v1/message/status?messageId=<MESSAGE_ID>
+
+4) Check Account & Connected WhatsApp Channels:
+   GET https://whatsaapapi.nearmeteacher.in/api/v1/account/detail
+
+
+3. REQUEST PAYLOAD SPECIFICATIONS
+--------------------------------------------------------------------------------
+
+A. Plain Text Notification:
+---------------------------
+POST /api/v1/message/create
+Headers:
+  Content-Type: application/json
+  x-api-key: wf_live_h7exzBR8KFIBPzr78W4xqN9yuaISEYCWd3rnvZGy2Pw
+
+Body (JSON):
+{
+  "receiverMobileNo": "919876543210",
+  "message": [
+    "Hello Teacher! You have received a new enquiry on NearMeTeacher."
+  ]
+}
+
+* Phone Number Formats:
+  - 10-digit: "9876543210" (automatically converted with +91)
+  - With country code: "919876543210" or "+919876543210"
+  - Multiple numbers (comma-separated or array): "9876543210, 9811122233"
+
+
+B. Notification with Attached File / PDF / Image (e.g. Notes or Payment Receipt):
+---------------------------------------------------------------------------------
+POST /api/v1/message/create
+Headers:
+  Content-Type: application/json
+  x-api-key: wf_live_h7exzBR8KFIBPzr78W4xqN9yuaISEYCWd3rnvZGy2Pw
+
+Body (JSON):
+{
+  "receiverMobileNo": "919876543210",
+  "message": [
+    "Dear Student, your Physics Chapter 1 notes are attached below."
+  ],
+  "filePathUrl": [
+    "https://nearmeteacher.in/uploads/physics-notes.pdf"
+  ]
+}
+* Note: filePathUrl supports public HTTP/HTTPS direct download links and public Google Drive share links.
+
+
+C. Interactive Buttons Message:
+-------------------------------
+POST /api/v1/message/create
+Headers:
+  Content-Type: application/json
+  x-api-key: wf_live_h7exzBR8KFIBPzr78W4xqN9yuaISEYCWd3rnvZGy2Pw
+
+Body (JSON):
+{
+  "receiverMobileNo": "919876543210",
+  "button": {
+    "title": "New Enquiry Alert",
+    "body": "Student Aarav requested Physics tuition for Class 10.",
+    "footer": "NearMeTeacher",
+    "buttons": [
+      { "text": "Accept Enquiry" },
+      { "text": "View in Portal" }
+    ]
+  }
+}
+
+
+D. Standard API Response:
+-------------------------
+{
+  "status": 200,
+  "message": "success",
+  "result": {
+    "id": "67f1234567890abcdef12345",
+    "batchId": "67f1234567890abcdef12346",
+    "creationTime": "2026-10-15T16:35:00.000Z",
+    "recipients": [
+      {
+        "id": "67f1234567890abcdef12345",
+        "number": "919876543210@c.us",
+        "status": "SENT"
+      }
+    ]
+  }
+}
+
+
+4. READY-TO-USE NODE.JS SERVICE MODULE (Copy & Paste into Backend)
+--------------------------------------------------------------------------------
+File: services/whatsapp.service.js
+
+const axios = require("axios"); // or import axios from "axios";
+
+const WHATSAPP_API_URL = "https://whatsaapapi.nearmeteacher.in/api/v1/message/create";
+const WHATSAPP_API_KEY = process.env.WHATSAPP_API_KEY || "wf_live_h7exzBR8KFIBPzr78W4xqN9yuaISEYCWd3rnvZGy2Pw";
+
+/**
+ * Core function to send WhatsApp message via NearMeTeacher API
+ */
+async function sendWhatsAppMessage({ to, message, fileUrl = null, buttons = null }) {
+  try {
+    const payload = {
+      receiverMobileNo: String(to).replace(/\D/g, "").slice(-10),
+    };
+
+    if (buttons) {
+      payload.button = buttons;
+    } else {
+      payload.message = Array.isArray(message) ? message : [message];
+    }
+
+    if (fileUrl) {
+      payload.filePathUrl = Array.isArray(fileUrl) ? fileUrl : [fileUrl];
+    }
+
+    const response = await axios.post(WHATSAPP_API_URL, payload, {
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": WHATSAPP_API_KEY,
+      },
+      timeout: 15000,
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error("WhatsApp Send Error:", error.response?.data || error.message);
+    return null;
+  }
+}
+
+/**
+ * 1. Student Enquiry -> Send to Teacher
+ */
+async function notifyTeacherOnEnquiry({
+  teacherPhone,
+  teacherName,
+  studentName,
+  subject,
+  gradeOrClass,
+  location,
+}) {
+  const text = 
+`🔔 *New Student Enquiry - NearMeTeacher*
+
+Hello *${teacherName}*,
+You have received a new tuition enquiry!
+
+👤 *Student:* ${studentName}
+📚 *Subject:* ${subject}
+🎓 *Class/Grade:* ${gradeOrClass}
+📍 *Location:* ${location}
+
+Please login to your teacher dashboard to connect with the student.
+🌐 https://nearmeteacher.in/dashboard`;
+
+  return sendWhatsAppMessage({ to: teacherPhone, message: text });
+}
+
+/**
+ * 2. Demo Class Scheduled -> Notify Student or Teacher
+ */
+async function notifyDemoScheduled({
+  recipientPhone,
+  recipientName,
+  role = "student",
+  otherPartyName,
+  subject,
+  dateTime,
+  meetingLink,
+}) {
+  const text =
+`📅 *Demo Class Scheduled - NearMeTeacher*
+
+Hello *${recipientName}*,
+Your demo class has been scheduled successfully!
+
+📚 *Subject:* ${subject}
+👤 *${role === "student" ? "Teacher" : "Student"}:* ${otherPartyName}
+⏰ *Date & Time:* ${dateTime}
+🔗 *Join Link:* ${meetingLink || "In-person at student location"}
+
+Please be ready 5 minutes before the session starts.`;
+
+  return sendWhatsAppMessage({ to: recipientPhone, message: text });
+}
+
+/**
+ * 3. Payment Confirmation
+ */
+async function notifyPaymentConfirmation({
+  recipientPhone,
+  studentName,
+  amount,
+  transactionId,
+  receiptUrl = null,
+}) {
+  const text =
+`💳 *Payment Received - NearMeTeacher*
+
+Dear *${studentName}*,
+We have successfully received your payment of *₹${amount}*.
+
+🆔 *Txn ID:* ${transactionId}
+✅ *Status:* Successful
+
+Thank you for choosing NearMeTeacher!`;
+
+  return sendWhatsAppMessage({
+    to: recipientPhone,
+    message: text,
+    fileUrl: receiptUrl,
+  });
+}
+
+/**
+ * 4. Regular Class Scheduled / Reminder
+ */
+async function notifyClassScheduled({
+  studentPhone,
+  studentName,
+  teacherName,
+  subject,
+  classTime,
+  linkOrLocation,
+}) {
+  const text =
+`⏰ *Class Reminder - NearMeTeacher*
+
+Hello *${studentName}*,
+Your upcoming class is scheduled as follows:
+
+📚 *Subject:* ${subject}
+👨‍🏫 *Teacher:* ${teacherName}
+🕒 *Time:* ${classTime}
+📍 *Details/Link:* ${linkOrLocation}
+
+Have a productive class!`;
+
+  return sendWhatsAppMessage({ to: studentPhone, message: text });
+}
+
+/**
+ * 5. Study Notes Uploaded -> Send direct download / PDF
+ */
+async function notifyNotesUploaded({
+  studentPhone,
+  studentName,
+  teacherName,
+  subject,
+  notesTitle,
+  notesPdfUrl,
+}) {
+  const text =
+`📚 *New Study Material Uploaded - NearMeTeacher*
+
+Hello *${studentName}*,
+*${teacherName}* has uploaded new study notes for *${subject}*:
+
+📄 *Title:* ${notesTitle}
+
+The document is attached below. You can also view it on your student portal.`;
+
+  return sendWhatsAppMessage({
+    to: studentPhone,
+    message: text,
+    fileUrl: notesPdfUrl,
+  });
+}
+
+module.exports = {
+  sendWhatsAppMessage,
+  notifyTeacherOnEnquiry,
+  notifyDemoScheduled,
+  notifyPaymentConfirmation,
+  notifyClassScheduled,
+  notifyNotesUploaded,
+};
+
+
+5. CONTROLLER INTEGRATION EXAMPLES
+--------------------------------------------------------------------------------
+
+A. In your Student Enquiry Controller:
+-------------------------------------
+const { notifyTeacherOnEnquiry } = require("../services/whatsapp.service");
+
+async function handleStudentEnquiry(req, res) {
+  // 1. Save enquiry to database
+  const enquiry = await Enquiry.create(req.body);
+  const teacher = await Teacher.findById(enquiry.teacherId);
+
+  // 2. Trigger WhatsApp notification (asynchronous, non-blocking)
+  notifyTeacherOnEnquiry({
+    teacherPhone: teacher.phone,
+    teacherName: teacher.name,
+    studentName: enquiry.studentName,
+    subject: enquiry.subject,
+    gradeOrClass: enquiry.grade,
+    location: enquiry.location || "Online",
+  }).catch((err) => console.error("WhatsApp error:", err));
+
+  return res.status(201).json({ success: true, enquiry });
+}
+
+
+B. In your Demo Booking Controller:
+-----------------------------------
+const { notifyDemoScheduled } = require("../services/whatsapp.service");
+
+async function handleScheduleDemo(req, res) {
+  const demo = await DemoClass.create(req.body);
+
+  // Notify student
+  notifyDemoScheduled({
+    recipientPhone: demo.studentPhone,
+    recipientName: demo.studentName,
+    role: "student",
+    otherPartyName: demo.teacherName,
+    subject: demo.subject,
+    dateTime: demo.scheduledAtFormatted,
+    meetingLink: demo.onlineMeetingLink,
+  });
+
+  // Notify teacher
+  notifyDemoScheduled({
+    recipientPhone: demo.teacherPhone,
+    recipientName: demo.teacherName,
+    role: "teacher",
+    otherPartyName: demo.studentName,
+    subject: demo.subject,
+    dateTime: demo.scheduledAtFormatted,
+    meetingLink: demo.onlineMeetingLink,
+  });
+
+  return res.json({ success: true, demo });
+}
+
+
+C. In your Payment Webhook / Controller:
+----------------------------------------
+const { notifyPaymentConfirmation } = require("../services/whatsapp.service");
+
+async function handlePaymentSuccess(req, res) {
+  const payment = await Payment.findById(req.body.paymentId);
+  payment.status = "SUCCESS";
+  await payment.save();
+
+  notifyPaymentConfirmation({
+    recipientPhone: payment.studentPhone,
+    studentName: payment.studentName,
+    amount: payment.amount,
+    transactionId: payment.transactionId,
+    receiptUrl: payment.invoicePdfUrl,
+  });
+
+  return res.json({ success: true });
+}
+
+
+D. In your Notes Upload Controller:
+-----------------------------------
+const { notifyNotesUploaded } = require("../services/whatsapp.service");
+
+async function handleNotesUpload(req, res) {
+  const note = await Note.create({
+    title: req.body.title,
+    subject: req.body.subject,
+    fileUrl: req.file.location, // S3 or server URL
+  });
+
+  const students = await Student.find({ subject: note.subject });
+  for (const student of students) {
+    notifyNotesUploaded({
+      studentPhone: student.phone,
+      studentName: student.name,
+      teacherName: req.user.name,
+      subject: note.subject,
+      notesTitle: note.title,
+      notesPdfUrl: note.fileUrl,
+    });
+  }
+
+  return res.json({ success: true, note });
+}
+
+
+6. QUICK TERMINAL / CURL TEST
+--------------------------------------------------------------------------------
+To test sending a message to any phone number, run:
+
+curl -X POST "https://whatsaapapi.nearmeteacher.in/api/v1/message/create" \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: wf_live_h7exzBR8KFIBPzr78W4xqN9yuaISEYCWd3rnvZGy2Pw" \
+  -d '{
+    "receiverMobileNo": "919999999999",
+    "message": ["Hello from NearMeTeacher WhatsApp API!"]
+  }'
+
+================================================================================
